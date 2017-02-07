@@ -52,7 +52,7 @@ Animal.prototype.tick = function() {
   });
 
   // Check if this animal should die
-  if (this.cells.length <= 0 || health <= 0) {
+  if (this.cells.length <= 0 || this.health <= 0) {
     debug("This animal is dead! Put it into removal bin.");
     var index = this.world.animals.indexOf(this);
     if (index > -1) {
@@ -67,7 +67,7 @@ Animal.prototype.tick = function() {
 
   fluidConcentation = tempFluidConcentration / cells.length;
   // run the neural network, inputs, inter, outputs
-  debug("Amimal " + this.id + " has " + this.cells.length + " cells and fluid concentration of " + this.fluidConcentation + ".");
+  debug("Amimal " + this.id + " has " + this.cells.length + " cells, health of " + this.health + " and fluid concentration of " + this.fluidConcentation + ".");
 }
 
 Animal.prototype.createNewCell = function(fluidConcentation) {
