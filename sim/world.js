@@ -1,4 +1,4 @@
-var debug = require('debug')('ex2:server');
+var debug = require('debug')('world');
 var Animal = require('./animal.js')
 
 var tickNr = 0;
@@ -17,7 +17,7 @@ exports.start = function() {
     for (j = 0; j < dnaSize; j++) {
       dna.push(Math.floor((Math.random() * 20) + 1));
     }
-    animals.push(new Animal(dna, i));
+    animals.push(new Animal(dna, i, this));
   }
 
   // Enter the eternal loop
