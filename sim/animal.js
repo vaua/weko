@@ -24,7 +24,7 @@ function Animal(dna, id, parent) {
 
 Animal.prototype.tick = function() {
   // Express genes == grow the body
-  var tempFluidConcentration = 0;
+  //var tempFluidConcentration = 0;
   this.newCells = [];
   this.deadCells = [];
 
@@ -32,8 +32,18 @@ Animal.prototype.tick = function() {
   this.cells.forEach(function(cell) {
     debug("Ticking a new cell with id: " + cell.id + ".");
     cell.tick();
-    that.tempFluidConcentration += cell.fluidConcentation * cell.openness;
+    // Animal has some fluid concentration, cells have one each. If cell is 100% open,
+    // it will add all its full contribution to the cell.
+    // Question is - how much "mass" is the cell fluid, and how much is the cells?
+    // Plan 1: no mass. So the sum of the cells is all volume. But this does not work.
+    // Plan 2: Same mass in as out. So, if one cell, then initially in=out=0.5.
+    // If in changes to 0.4, and is 10% open then it will let in 10% of the difference in
+    // which is (0.5-0.4)*0.1=0.01 => 0.41 inne. Ute då? Eftersom samma mass, då är ute 0.49.
+    // This is too difficult. Let's ignore the external fluid concentration for now.
+    //that.tempFluidConcentration += (cell.fluidConcentation * cell.openness);
   });
+
+  //this.fluidConcentation += that.fluidConcentation / this.cells.length;
 
 
   debug("Removing " + this.deadCells.length + " cells, adding " + this.newCells.length + " cells.");
@@ -65,9 +75,9 @@ Animal.prototype.tick = function() {
     }
   }
 
-  fluidConcentation = tempFluidConcentration / cells.length;
+  //fluidConcentation = tempFluidConcentration / cells.length;
   // run the neural network, inputs, inter, outputs
-  debug("Amimal " + this.id + " has " + this.cells.length + " cells, health of " + this.health + " and fluid concentration of " + this.fluidConcentation + ".");
+  debug("Amimal " + this.id + " has " + this.cells.length + " cells, health of " + this.health + "."); //" and fluid concentration of " + this.fluidConcentation + ".");
 }
 
 Animal.prototype.createNewCell = function(fluidConcentation) {
