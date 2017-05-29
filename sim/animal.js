@@ -77,7 +77,7 @@ Animal.prototype.tick = function() {
 
   //fluidConcentation = tempFluidConcentration / cells.length;
   // run the neural network, inputs, inter, outputs
-  debug("Amimal " + this.id + " has " + this.cells.length + " cells, health of " + this.health + "."); //" and fluid concentration of " + this.fluidConcentation + ".");
+  debug("Amimal " + this.id + " has " + this.cells.length + " cells, health of " + this.health + ".");
 }
 
 Animal.prototype.createNewCell = function(fluidConcentation) {
