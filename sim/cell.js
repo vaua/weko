@@ -6,6 +6,30 @@ var parentAnimal;
 var openness;
 var markedForDeath;
 var debug = require('debug')('cell');
+var cellProteins = {};
+
+var Proteins = {
+  REDUCES_PROTEINS_1 : 0,          // Reduces the number of all proteins to half (but does not affect permanen proteins)
+  START_CELL_DIVISION_1 : 1,       // If this protein is expressed, the cell will devide itself
+  NEURON_0 : 2,                    // Cell will get an axon that will connect to all at that time receptive axons. Permanent, makes cell neural cell.
+  CONNECT_DENDRITES_1: 3,          // Neural cell will connect its axon to currently receptive dendrites
+  DISCONNECT_DENDRITES_1: 4,       // Neural cell will disconnect X least used dendrites.
+  DISCONNECT_DENDRITES_3: 5,       // Neural cell will disconnect X least used dendrites.
+  DISCONNECT_DENDRITES_5: 6,       // Neural cell will disconnect X least used dendrites.
+  BLOCK_CONNECT_DENDRITES_1: 7,    // Blockerar protein that connects dendrites.
+  BLOCK_CONNECT_DENDRITES_3: 8,    // Blockerar protein that connects dendrites.
+  BLOCK_CONNECT_DENDRITES_5: 9,    // Blockerar protein that connects dendrites.
+  CONNECT_AXON_1: 10,              // Neural cell connects to all receptive axons
+  CONNECT_AXON_5: 11,              // Neural cell connects to all receptive axons
+  BLOCK_CONNECT_AXON_1: 12,        // Block cell from connecting to axons
+  BLOCK_CONNECT_AXON_3: 13,        // Block cell from connecting to axons
+  ACCEPT_DENDRITES_1: 14,          // Neural cell accepts dendrites
+  ACCEPT_DENDRITES_5: 15,          // Neural cell accepts dendrites
+  BLOCK_ACCEPT_DENDRITES_1: 16,    // Blocks acceptance for dendrites
+  BLOCK_ACCEPT_DENDRITES_5: 17,    // Blocks acceptance for dendrites
+  DEVELOP_MOTOR_CELL_0: 18,        // Upon new cell division, this cell becomes motor cell
+  DEVELOP_OPTICAL_CELL_0: 19,      // Upon cell division, the daughter cell becomes optical cell.
+};
 
 function Cell(id, parent, dna, initialInnerLevel) {
   this.id = id;
