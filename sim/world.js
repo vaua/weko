@@ -2,8 +2,8 @@ var debug = require('debug')('world');
 var Animal = require('./animal.js')
 
 var tickNr = 0;
-var INITIAL_ANIMAL_NUMBER = 10000;
-var runForTicks = 100000;
+var INITIAL_ANIMAL_NUMBER = 0;
+var runForTicks = 100;
 var HORIZON = 3;
 var WORLD_WIDTH = 2;
 var CHANCE_OF_FOOD = 0.1;
@@ -25,26 +25,26 @@ function transformLocationsIntoVisualInput(locations) {
 		var locationLayer = locations[i];
 		// Check for danger
 		if (locationLayer[0] == 2 || locationLayer[0] == 3) {
-			visualInput[i * WORLD_WIDTH] = 1; 
+			visualInput[i * WORLD_WIDTH] = 1;
 		}  else {
-			visualInput[i * WORLD_WIDTH] = 0; 
+			visualInput[i * WORLD_WIDTH] = 0;
 		}
 		if (locationLayer[1] == 2 || locationLayer[0] == 3) {
-			visualInput[i * WORLD_WIDTH + 1] = 1; 
+			visualInput[i * WORLD_WIDTH + 1] = 1;
 		}  else {
-			visualInput[i * WORLD_WIDTH + 1] = 0; 
+			visualInput[i * WORLD_WIDTH + 1] = 0;
 		}
 
 		// Check for food
 		if (locationLayer[0] == 1 || locationLayer[0] == 3) {
-			visualInput[i * WORLD_WIDTH + 2] = 1; 
+			visualInput[i * WORLD_WIDTH + 2] = 1;
 		}  else {
-			visualInput[i * WORLD_WIDTH + 2] = 0; 
+			visualInput[i * WORLD_WIDTH + 2] = 0;
 		}
 		if (locationLayer[1] == 1 || locationLayer[0] == 3) {
-			visualInput[i * WORLD_WIDTH + 3] = 1; 
+			visualInput[i * WORLD_WIDTH + 3] = 1;
 		}  else {
-			visualInput[i * WORLD_WIDTH + 3] = 0; 
+			visualInput[i * WORLD_WIDTH + 3] = 0;
 		}
 	}
 	return visualInput;
@@ -60,10 +60,15 @@ World.prototype.start = function() {
     var dna = [];
     var dnaSize = Math.floor((Math.random() * 90) + 10);
     for (j = 0; j < dnaSize; j++) {
-      dna.push(Math.floor((Math.random() * 20) + 1));
+      dna.push(Math.floor((Math.random() * 21) + 1));
     }
     this.animals.push(new Animal(dna, i, this));
   }
+
+  // Here, special animals are added.
+  specialDna = [6, 7, 12, 6, 17, 7, 1, 8, 8, 8, 1, 8, 8, 8 ,8 ,8 ,8 ,8 ,8 ,7, 6];
+  this.animals.push(new Animal(specialDna, INITIAL_ANIMAL_NUMBER, this));
+
   // Populate the view with food and danger
   for (i = 0; i < HORIZON; i++) {
     oneRow = [];
@@ -85,10 +90,14 @@ World.prototype.start = function() {
   while(tickNr != runForTicks) {
     tickNr++;
     debug("Started world tick " + tickNr + " with " + this.animals.length + " animals in the world.");
+    //debug("First row: " + this.visibleLocations[this.pointerToView][0] + "," + this.visibleLocations[this.pointerToView][1]);
+	  //debug("Visual input is: " + this.visualInput);
 
-    debug("First row: " + this.visibleLocations[this.pointerToView][0] + "," + this.visibleLocations[this.pointerToView][1]);
-	debug("Visual input is: " + this.visualInput);
-	
+    // Check if no animals left, exit
+    if (this.animals.length < 1) {
+      break;
+    }
+
     // Run all creatures and things in the universe
     this.animals.forEach(function(animal) {
       animal.tick();
@@ -107,7 +116,7 @@ World.prototype.start = function() {
       }
       if (Math.random() < RISK_OF_DANGER) oneRow[j] += 2;
     }
-	
+
     this.visibleLocations[this.pointerToView] = oneRow;
     // Increase the pointerToView
     this.pointerToView = (this.pointerToView + 1) % HORIZON;
