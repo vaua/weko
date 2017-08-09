@@ -2,7 +2,7 @@ var debug = require('debug')('world');
 var Animal = require('./animal.js')
 
 var tickNr = 0;
-var INITIAL_ANIMAL_NUMBER = 0;
+var INITIAL_ANIMAL_NUMBER = 3;
 var runForTicks = 100;
 var HORIZON = 3;
 var WORLD_WIDTH = 2;

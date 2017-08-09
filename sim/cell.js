@@ -92,7 +92,7 @@ Cell.prototype.tick = function() {
   // Expressing the genes
   switch(this.dna[gene]) {
     case Proteins.REDUCES_PROTEINS:
-      this.proteins[Proteins.REDUCES_PROTEINS] = 1;
+      this.proteins[Proteins.REDUCES_PROTEINS] = 3;
       break;
     case Proteins.START_CELL_DIVISION || Proteins.START_CELL_DIVISION_B || Proteins.START_CELL_DIVISION_C:
       this.proteins[Proteins.START_CELL_DIVISION] = 1;
@@ -157,16 +157,14 @@ Cell.prototype.tick = function() {
 
   // Now, do actions for all proteins found in the cell
   if (this.hasProtein(Proteins.REDUCES_PROTEINS)) {
-    debug("Reducing proteins.");
-    reduceProteinMix(this.proteins);
-    this.proteins[Proteins.REDUCES_PROTEINS] -= 1;
+    debug("Reducing proteins (not yet).");
+    //reduceProteinMixByHalf(this.proteins);
   }
 
   if (this.hasProtein(Proteins.START_CELL_DIVISION)) {
     debug("Creating new cell!");
     //TODO: Reduce protein mix to half before spawing the cell.
-    reduceProteinMix(this.proteins);
-    this.proteins[Proteins.START_CELL_DIVISION] -= 1;
+    reduceProteinMixByHalf(this.proteins);
 
     // copy the proteins, TODO: reduce the number
     var newCellProtein = {};
@@ -181,22 +179,18 @@ Cell.prototype.tick = function() {
     debug("I am a neuron cell!");
 
     if (this.hasProtein(Proteins.CONNECT_DENDRITES)) {
-      this.proteins[Proteins.CONNECT_DENDRITES] -= 1;
       debug("Connecting dendrites");
     }
 
     if (this.hasProtein(Proteins.ACCEPT_DENDRITES)) {
-      this.proteins[Proteins.ACCEPT_DENDRITES] -= 1;
       debug("Accepting dendrites");
     }
 
     if (this.hasProtein(Proteins.DICCONNECT_DENDRITES)) {
-      this.proteins[Proteins.DISCONNECT_DENDRITES] -= 1;
       debug("Disconnecting dendrites");
     }
 
     if (this.hasProtein(Proteins.CONNECT_AXON)) {
-      this.proteins[Proteins.CONNECT_AXON] -= 1;
       debug("Connecting Axon!");
     }
 
@@ -208,6 +202,9 @@ Cell.prototype.tick = function() {
       debug("I'm a optical cell!");
     }
   }
+
+  // Once done with all actions, reduce all protein concentrations by 1
+  reduceProteinMixByOne(this.proteins);
 
   // run the neural network, inputs, inter, outputs
 }
@@ -242,9 +239,16 @@ function calculateProteinMix(proteins) {
   return proteinSum;
 }
 
-function reduceProteinMix(proteins) {
+function reduceProteinMixByHalf(proteins) {
   Object.keys(proteins).forEach(function(key) {
     proteins[key] = proteins[key] / 2;
+    if (proteins[key] < 1) delete proteins[key];
+  });
+}
+
+function reduceProteinMixByOne(proteins) {
+  Object.keys(proteins).forEach(function(key) {
+    if (proteins[key] > 1) proteins[key] -= 1;
     if (proteins[key] < 1) delete proteins[key];
   });
 }

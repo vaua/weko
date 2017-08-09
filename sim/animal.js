@@ -72,6 +72,8 @@ Animal.prototype.tick = function() {
     }
   }
 
+  // Reduce animal health every step - this will need to wait for a way to increase health somehow.
+
   //fluidConcentation = tempFluidConcentration / cells.length;
   // run the neural network, inputs, inter, outputs
   debug("Amimal " + this.id + " has " + this.cells.length + " cells, health of " + this.health + ".");
