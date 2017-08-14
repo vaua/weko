@@ -8,30 +8,51 @@ var cellAge;
 var AGE_WHEN_CELL_CAN_DIE = 100;
 var RISK_OF_CELL_DEATH_OF_OLD_AGE = 0.02
 
+// Proteins definitions
+var REDUCTION_START = 0;
+var REDUCTION_LENGTH = 1;
+var DIVISION_START = REDUCTION_START + REDUCTION_LENGTH;
+var DIVISION_LENGTH = 10;
+var NEURON_START = DIVISION_START + DIVISION_LENGTH;
+var NEURON_LENGTH = 10;
+var CONNECT_DENDRITES_START = NEURON_START + NEURON_LENGTH;
+var CONNECT_DENDRITES_LENGTH = 5;
+var DISCONNECT_DENDRITES_START = CONNECT_DENDRITES_START + CONNECT_DENDRITES_LENGTH;
+var DISCONNECT_DENDRITES_LENGTH = 5;
+var BLOCK_CONNECT_DENDRITES_START = DISCONNECT_DENDRITES_START + DISCONNECT_DENDRITES_LENGTH;
+var BLOCK_CONNECT_DENDRITES_LENGTH = 5;
+var BLOCK_DISCONNECT_DENDRITES_START = BLOCK_CONNECT_DENDRITES_START + BLOCK_CONNECT_DENDRITES_LENGTH;
+var BLOCK_DISCONNECT_DENDRITES_LENGTH = 5;
+var CONNECT_AXON_START = BLOCK_DISCONNECT_DENDRITES_START + BLOCK_DISCONNECT_DENDRITES_LENGTH;
+var CONNECT_AXON_LENGTH = 10;
+var BLOCK_CONNECT_AXON_START = CONNECT_AXON_START + CONNECT_AXON_LENGTH;
+var BLOCK_CONNECT_AXON_LENGTH = 5;
+var ACCEPT_DENDRITES_START = BLOCK_CONNECT_AXON_START + BLOCK_CONNECT_AXON_LENGTH;
+var ACCEPT_DENDRITES_LENGTH = 5;
+var BLOCK_ACCEPT_DENDRITES_START = ACCEPT_DENDRITES_START + ACCEPT_DENDRITES_LENGTH;
+var BLOCK_ACCEPT_DENDRITES_LENGTH = 5;
+var MOTOR_CELL_START = BLOCK_ACCEPT_DENDRITES_START + BLOCK_ACCEPT_DENDRITES_LENGTH;
+var MOTOR_CELL_LENGTH = 10;
+var OPTICAL_CELL_START = MOTOR_CELL_START + MOTOR_CELL_LENGTH;
+var OPTICAL_CELL_LENGTH = 10;
+
+var ALL_PROTEINS_LENGTH = OPTICAL_CELL_START + OPTICAL_CELL_LENGTH;
+
+
+
 var Proteins = {
-  REDUCES_PROTEINS : 0,          // Reduces the number of all proteins to half (but does not affect permanen proteins)
-  START_CELL_DIVISION : 1,       // If this protein is expressed, the cell will devide itself
-  NEURON : 2,                    // Cell will get an axon that will connect to all at that time receptive axons. Permanent, makes cell neural cell.
-  CONNECT_DENDRITES: 3,          // Neural cell will connect its axon to currently receptive dendrites
-  DISCONNECT_DENDRITES: 4,       // Neural cell will disconnect X least used dendrites.
-  DISCONNECT_DENDRITES_3: 5,       // Neural cell will disconnect X least used dendrites.
-  DISCONNECT_DENDRITES_5: 6,       // Neural cell will disconnect X least used dendrites.
-  BLOCK_CONNECT_DENDRITES: 7,    // Blockerar protein that connects dendrites.
-  BLOCK_CONNECT_DENDRITES_3: 8,    // Blockerar protein that connects dendrites.
-  BLOCK_CONNECT_DENDRITES_5: 9,    // Blockerar protein that connects dendrites.
-  CONNECT_AXON: 10,              // Neural cell connects to all receptive axons
-  CONNECT_AXON_5: 11,              // Neural cell connects to all receptive axons
-  BLOCK_CONNECT_AXON: 12,        // Block cell from connecting to axons
-  BLOCK_CONNECT_AXON_3: 13,        // Block cell from connecting to axons
-  ACCEPT_DENDRITES: 14,          // Neural cell accepts dendrites
-  ACCEPT_DENDRITES_5: 15,          // Neural cell accepts dendrites
-  BLOCK_ACCEPT_DENDRITES: 16,    // Blocks acceptance for dendrites
-  BLOCK_ACCEPT_DENDRITES_5: 17,    // Blocks acceptance for dendrites
-  DEVELOP_MOTOR_CELL: 18,        // Upon new cell division, this cell becomes motor cell
-  DEVELOP_OPTICAL_CELL: 19,      // Upon cell division, the daughter cell becomes optical cell.
-  START_CELL_DIVISION_B: 20,     // Another cell division
-  START_CELL_DIVISION_C: 21,
-  START_CELL_DIVISION_D: 22,     // Another cell division: 20,     // Another cell division
+  REDUCES_PROTEINS :        REDUCTION_START,                 // Reduces the number of all proteins to half (but does not affect permanen proteins)
+  START_CELL_DIVISION :     DIVISION_START,                  // If this protein is expressed, the cell will devide itself
+  NEURON :                  NEURON_START,                    // Cell will get an axon that will connect to all at that time receptive axons. Permanent, makes cell neural cell.
+  CONNECT_DENDRITES:        CONNECT_DENDRITES_START,         // Neural cell will connect its axon to currently receptive dendrites
+  DISCONNECT_DENDRITES:     DISCONNECT_DENDRITES_START,      // Neural cell will disconnect X least used dendrites.
+  BLOCK_CONNECT_DENDRITES:  BLOCK_CONNECT_DENDRITES_START,   // Blockerar protein that connects dendrites.
+  CONNECT_AXON:             CONNECT_AXON_START,              // Neural cell connects to all receptive axons
+  BLOCK_CONNECT_AXON:       BLOCK_CONNECT_AXON_START,        // Block cell from connecting to axons
+  ACCEPT_DENDRITES:         ACCEPT_DENDRITES_START,          // Neural cell accepts dendrites
+  BLOCK_ACCEPT_DENDRITES:   BLOCK_ACCEPT_DENDRITES_START,    // Blocks acceptance for dendrites
+  DEVELOP_MOTOR_CELL:       MOTOR_CELL_START,                // Upon new cell division, this cell becomes motor cell
+  DEVELOP_OPTICAL_CELL:     OPTICAL_CELL_START,              // Upon cell division, the daughter cell becomes optical cell.
 };
 
 function Cell(id, parent, dna, proteins) {
@@ -42,6 +63,7 @@ function Cell(id, parent, dna, proteins) {
   this.proteins = proteins;   // this is the protein map - needs to be halved for the more realistic scenario.
   this.parentAnimal = parent;
   this.proteins[Proteins.REDUCES_PROTEINS] = 1;
+  this.positionInDna = 0;
   debug("New cell is born with name: " + this.id);
   debug("DNA is: " + this.dna);
 }
@@ -54,8 +76,6 @@ Cell.prototype.hasProtein = function(protein) {
     }
     else return false;
 }
-
-
 
 Cell.prototype.tick = function() {
   var that = this;
@@ -75,85 +95,121 @@ Cell.prototype.tick = function() {
   //action = dna[innerLevel];
   debug("Protein keys in the beginning of turn: " + Object.keys(this.proteins));
 
-
   Object.keys(this.proteins).forEach(function(key) {
     debug("protein key: " + key + " value: " + that.proteins[key]);
   });
 
-  var proteinMix = calculateProteinMix(this.proteins);
+  // Expressing the DNA
+  if (!(this.positionInDna < 0 || this.positionInDna > this.dna.length)) {
+    debug("Expressing gene " + this.positionInDna + " with protein " + this.dna[this.positionInDna]);
 
-  var gene = Math.floor(this.dna.length * proteinMix) - 1;
-  if (gene < 0) gene = 0;
-  debug("Gene " + gene + " with protein " + this.dna[gene] + " chosen by protein mix " + proteinMix);
+    // Execute the action
+    // TODO: Split this into two parts: first express the gene chosen, second act upon the proteins in the cell.
 
-  // Execute the action
-  // TODO: Split this into two parts: first express the gene chosen, second act upon the proteins in the cell.
+    // Expressing the genes
+    var proteinExpressed = this.dna[this.positionInDna];
 
-  // Expressing the genes
-  switch(this.dna[gene]) {
-    case Proteins.REDUCES_PROTEINS:
-      this.proteins[Proteins.REDUCES_PROTEINS] = 3;
-      break;
-    case Proteins.START_CELL_DIVISION || Proteins.START_CELL_DIVISION_B || Proteins.START_CELL_DIVISION_C:
-      this.proteins[Proteins.START_CELL_DIVISION] = 1;
-      break;
-    case Proteins.NEURON:
-      this.proteins[Proteins.NEURON] = 1;
-      break;
-    case Proteins.CONNECT_DENDRITES:
-      this.proteins[Proteins.CONNECT_DENDRITES] = 1;
-      break;
-    case Proteins.DISCONNECT_DENDRITES:
-      this.proteins[Proteins.DISCONNECT_DENDRITES] = 1;
-      break;
-    case Proteins.DISCONNECT_DENDRITES_3:
-      this.proteins[Proteins.DISCONNECT_DENDRITES] = 3;
-      break;
-    case Proteins.DISCONNECT_DENDRITES_5:
-      this.proteins[Proteins.DISCONNECT_DENDRITES] = 5;
-      break;
-    case Proteins.BLOCK_CONNECT_DENDRITES:
-      this.proteins[Proteins.BLOCK_CONNECT_DENDRITES] = 1;
-      break;
-    case Proteins.BLOCK_CONNECT_DENDRITES_3:
-      this.proteins[Proteins.BLOCK_CONNECT_DENDRITES] = 3;
-      break;
-    case Proteins.BLOCK_CONNECT_DENDRITES_5:
-      this.proteins[Proteins.BLOCK_CONNECT_DENDRITES] = 5;
-      break;
-    case Proteins.CONNECT_AXON:
-      this.proteins[Proteins.CONNECT_AXON] = 1;
-      break;
-    case Proteins.CONNECT_AXON_5:
-      this.proteins[Proteins.CONNECT_AXON] = 5;
-      break;
-    case Proteins.BLOCK_CONNECT_AXON:
-      this.proteins[Proteins.BLOCK_CONNECT_AXON] = 1;
-      break;
-    case Proteins.BLOCK_CONNECT_AXON_3:
-      this.proteins[Proteins.BLOCK_CONNECT_AXON] = 3;
-      break;
-    case Proteins.ACCEPT_DENDRITES:
-      this.proteins[Proteins.ACCEPT_DENDRITES] = 1;
-      break;
-    case Proteins.ACCEPT_DENDRITES_5:
-      this.proteins[Proteins.ACCEPT_DENDRITES] = 5;
-      break;
-    case Proteins.BLOCK_ACCEPT_DENDRITES:
-      this.proteins[Proteins.BLOCK_ACCEPT_DENDRITES] = 1;
-      break;
-    case Proteins.BLOCK_ACCEPT_DENDRITES_5:
-      this.proteins[Proteins.BLOCK_ACCEPT_DENDRITES] = 5;
-      break;
-    case Proteins.DEVELOP_MOTOR_CELL:
-      this.proteins[Proteins.DEVELOP_MOTOR_CELL] = 1;
-      break;
-    case Proteins.DEVELOP_OPTICAL_CELL:
-      this.proteins[Proteins.DEVELOP_OPTICAL_CELL] = 1;
-      break;
-    default: debug("A gene with no rule for expressing has been found.");
+    // Nested if-statements checking which protein has been expressed.
+    if (proteinExpressed < DIVISION_START) { // REDUCTION is expressed.
+      if (this.proteins.hasOwnProperty('REDUCES_PROTEINS')) this.proteins[REDUCES_PROTEINS] += 1;
+      else this.proteins[REDUCES_PROTEINS] = 1;
+    } else if (proteinExpressed < NEURON_START) {
+      debug('division.');
+    } else if (proteinExpressed < CONNECT_DENDRITES_START) {
+      debug("Neuron");
+    } else if (proteinExpressed < DISCONNECT_DENDRITES_START) {
+      debug("Connect dendrite");
+    } else if (proteinExpressed < BLOCK_CONNECT_DENDRITES_START) {
+      debug("Disconnect dendrites");
+    } else if (proteinExpressed < CONNECT_AXON_START) {
+      debug("Block conect dendrites");
+    } else if (proteinExpressed < BLOCK_CONNECT_AXON_START) {
+      debug("Axon start");
+    } else if (proteinExpressed < ACCEPT_DENDRITES_START) {
+      debug("Block connect axon");
+    } else if (proteinExpressed < BLOCK_ACCEPT_DENDRITES_START) {
+      debug("Accept dendrites start");
+    } else if (proteinExpressed < MOTOR_CELL_START) {
+      debug("Block accept dendrites");
+    } else if (proteinExpressed < OPTICAL_CELL_START) {
+      debug("Motor cell");
+    } else if (proteinExpressed < ALL_PROTEINS_LENGTH) {
+      debug("Optical cell");
+    }
 
+/*
+    switch(this.dna[gene]) {
+      case Proteins.REDUCES_PROTEINS:
+        this.proteins[Proteins.REDUCES_PROTEINS] = 3;
+        break;
+      case Proteins.START_CELL_DIVISION:
+        this.proteins[Proteins.START_CELL_DIVISION] = 1;
+        break;
+      case Proteins.NEURON:
+        this.proteins[Proteins.NEURON] = 1;
+        break;
+      case Proteins.CONNECT_DENDRITES:
+        this.proteins[Proteins.CONNECT_DENDRITES] = 1;
+        break;
+      case Proteins.DISCONNECT_DENDRITES:
+        this.proteins[Proteins.DISCONNECT_DENDRITES] = 1;
+        break;
+      case Proteins.DISCONNECT_DENDRITES_3:
+        this.proteins[Proteins.DISCONNECT_DENDRITES] = 3;
+        break;
+      case Proteins.DISCONNECT_DENDRITES_5:
+        this.proteins[Proteins.DISCONNECT_DENDRITES] = 5;
+        break;
+      case Proteins.BLOCK_CONNECT_DENDRITES:
+        this.proteins[Proteins.BLOCK_CONNECT_DENDRITES] = 1;
+        break;
+      case Proteins.BLOCK_CONNECT_DENDRITES_3:
+        this.proteins[Proteins.BLOCK_CONNECT_DENDRITES] = 3;
+        break;
+      case Proteins.BLOCK_CONNECT_DENDRITES_5:
+        this.proteins[Proteins.BLOCK_CONNECT_DENDRITES] = 5;
+        break;
+      case Proteins.CONNECT_AXON:
+        this.proteins[Proteins.CONNECT_AXON] = 1;
+        break;
+      case Proteins.CONNECT_AXON_5:
+        this.proteins[Proteins.CONNECT_AXON] = 5;
+        break;
+      case Proteins.BLOCK_CONNECT_AXON:
+        this.proteins[Proteins.BLOCK_CONNECT_AXON] = 1;
+        break;
+      case Proteins.BLOCK_CONNECT_AXON_3:
+        this.proteins[Proteins.BLOCK_CONNECT_AXON] = 3;
+        break;
+      case Proteins.ACCEPT_DENDRITES:
+        this.proteins[Proteins.ACCEPT_DENDRITES] = 1;
+        break;
+      case Proteins.ACCEPT_DENDRITES_5:
+        this.proteins[Proteins.ACCEPT_DENDRITES] = 5;
+        break;
+      case Proteins.BLOCK_ACCEPT_DENDRITES:
+        this.proteins[Proteins.BLOCK_ACCEPT_DENDRITES] = 1;
+        break;
+      case Proteins.BLOCK_ACCEPT_DENDRITES_5:
+        this.proteins[Proteins.BLOCK_ACCEPT_DENDRITES] = 5;
+        break;
+      case Proteins.DEVELOP_MOTOR_CELL:
+        this.proteins[Proteins.DEVELOP_MOTOR_CELL] = 1;
+        break;
+      case Proteins.DEVELOP_OPTICAL_CELL:
+        this.proteins[Proteins.DEVELOP_OPTICAL_CELL] = 1;
+        break;
+      default:
+        debug("A gene with no rule for expressing has been found. Setting it to multiply!");
+        this.proteins[Proteins.START_CELL_DIVISION] = 1;
+*/
+
+  } else {
+    debug("The DNA position " + this.positionInDna + " is outside of the size od DNA. No protein was expressed.");
   }
+
+  // increase positionInDna
+  this.positionInDna += 1;
 
   // Now, do actions for all proteins found in the cell
   if (this.hasProtein(Proteins.REDUCES_PROTEINS)) {

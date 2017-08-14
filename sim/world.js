@@ -2,12 +2,13 @@ var debug = require('debug')('world');
 var Animal = require('./animal.js')
 
 var tickNr = 0;
-var INITIAL_ANIMAL_NUMBER = 3;
-var runForTicks = 100;
+var INITIAL_ANIMAL_NUMBER = 7;
+var runForTicks = 30;
 var HORIZON = 3;
 var WORLD_WIDTH = 2;
 var CHANCE_OF_FOOD = 0.1;
 var RISK_OF_DANGER = 0.1;
+var NUMBER_OF_PROTEINS = 26;
 
 
 function World() {
@@ -60,7 +61,7 @@ World.prototype.start = function() {
     var dna = [];
     var dnaSize = Math.floor((Math.random() * 90) + 10);
     for (j = 0; j < dnaSize; j++) {
-      dna.push(Math.floor((Math.random() * 21) + 1));
+      dna.push(Math.floor((Math.random() * NUMBER_OF_PROTEINS) + 1));
     }
     this.animals.push(new Animal(dna, i, this));
   }
