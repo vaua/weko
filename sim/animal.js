@@ -7,6 +7,8 @@ var Cell = require("./cell.js");
 var debug = require('debug')('animal');
 var health;
 
+var dnaLength = Cell.ALL_PROTEINS_LENGTH;
+
 
 function Animal(dna, id, parent) {
   this.dna = dna;

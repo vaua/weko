@@ -35,17 +35,19 @@ var MOTOR_CELL_START = BLOCK_ACCEPT_DENDRITES_START + BLOCK_ACCEPT_DENDRITES_LEN
 var MOTOR_CELL_LENGTH = 10;
 var OPTICAL_CELL_START = MOTOR_CELL_START + MOTOR_CELL_LENGTH;
 var OPTICAL_CELL_LENGTH = 10;
+var NO_PROTEIN_START = OPTICAL_CELL_START + OPTICAL_CELL_LENGTH;
+var NO_PROTEIN_LENGTH = 10;
 
-var ALL_PROTEINS_LENGTH = OPTICAL_CELL_START + OPTICAL_CELL_LENGTH;
+ALL_PROTEINS_LENGTH = NO_PROTEIN_START + NO_PROTEIN_LENGTH;
 
 
 
 var Proteins = {
-  REDUCES_PROTEINS :        REDUCTION_START,                 // Reduces the number of all proteins to half (but does not affect permanen proteins)
-  START_CELL_DIVISION :     DIVISION_START,                  // If this protein is expressed, the cell will devide itself
-  NEURON :                  NEURON_START,                    // Cell will get an axon that will connect to all at that time receptive axons. Permanent, makes cell neural cell.
-  CONNECT_DENDRITES:        CONNECT_DENDRITES_START,         // Neural cell will connect its axon to currently receptive dendrites
-  DISCONNECT_DENDRITES:     DISCONNECT_DENDRITES_START,      // Neural cell will disconnect X least used dendrites.
+  REDUCES_PROTEINS :        REDUCTION_START,                 // 0, Reduces the number of all proteins to half (but does not affect permanen proteins)
+  START_CELL_DIVISION :     DIVISION_START,                  // 1, If this protein is expressed, the cell will devide itself
+  NEURON :                  NEURON_START,                    // 11, Cell will get an axon that will connect to all at that time receptive axons. Permanent, makes cell neural cell.
+  CONNECT_DENDRITES:        CONNECT_DENDRITES_START,         // 21, Neural cell will connect its axon to currently receptive dendrites
+  DISCONNECT_DENDRITES:     DISCONNECT_DENDRITES_START,      // 26, Neural cell will disconnect X least used dendrites.
   BLOCK_CONNECT_DENDRITES:  BLOCK_CONNECT_DENDRITES_START,   // Blockerar protein that connects dendrites.
   CONNECT_AXON:             CONNECT_AXON_START,              // Neural cell connects to all receptive axons
   BLOCK_CONNECT_AXON:       BLOCK_CONNECT_AXON_START,        // Block cell from connecting to axons
@@ -62,12 +64,14 @@ function Cell(id, parent, dna, proteins) {
   this.markedForDeath = false;
   this.proteins = proteins;   // this is the protein map - needs to be halved for the more realistic scenario.
   this.parentAnimal = parent;
-  this.proteins[Proteins.REDUCES_PROTEINS] = 1;
   this.positionInDna = 0;
   debug("New cell is born with name: " + this.id);
   debug("DNA is: " + this.dna);
 }
 
+/**
+* Checks whether a protein is contained in the cell at the given time.
+*/
 Cell.prototype.hasProtein = function(protein) {
     //debug("Checking if protein" + protein + " exists in the cell.");
     if (protein in Object.keys(this.proteins)) {
@@ -77,6 +81,9 @@ Cell.prototype.hasProtein = function(protein) {
     else return false;
 }
 
+/**
+* Main function executed for the cell on every tick.
+*/
 Cell.prototype.tick = function() {
   var that = this;
   this.cellAge += 1;
@@ -103,107 +110,46 @@ Cell.prototype.tick = function() {
   if (!(this.positionInDna < 0 || this.positionInDna > this.dna.length)) {
     debug("Expressing gene " + this.positionInDna + " with protein " + this.dna[this.positionInDna]);
 
-    // Execute the action
-    // TODO: Split this into two parts: first express the gene chosen, second act upon the proteins in the cell.
-
     // Expressing the genes
     var proteinExpressed = this.dna[this.positionInDna];
 
     // Nested if-statements checking which protein has been expressed.
     if (proteinExpressed < DIVISION_START) { // REDUCTION is expressed.
-      if (this.proteins.hasOwnProperty('REDUCES_PROTEINS')) this.proteins[REDUCES_PROTEINS] += 1;
-      else this.proteins[REDUCES_PROTEINS] = 1;
+		addProteinIntoTheMix(this.proteins, Proteins.REDUCES_PROTEINS, 1);
     } else if (proteinExpressed < NEURON_START) {
-      debug('division.');
+		addProteinIntoTheMix(this.proteins, Proteins.START_CELL_DIVISION, (proteinExpressed - DIVISION_START) + 1);
+		debug('division.');
     } else if (proteinExpressed < CONNECT_DENDRITES_START) {
-      debug("Neuron");
+		addProteinIntoTheMix(this.proteins, Proteins.NEURON, 1);
+		debug("Neuron");
     } else if (proteinExpressed < DISCONNECT_DENDRITES_START) {
-      debug("Connect dendrite");
+		addProteinIntoTheMix(this.proteins, Proteins.CONNECT_DENDRITES, (proteinExpressed - CONNECT_DENDRITES_START) + 1);
+		debug("Connect dendrites");
     } else if (proteinExpressed < BLOCK_CONNECT_DENDRITES_START) {
-      debug("Disconnect dendrites");
+		addProteinIntoTheMix(this.proteins, Proteins.DISCONNECT_DENDRITES, (proteinExpressed - DISCONNECT_DENDRITES_START) + 1);
+		debug("Disconnect dendrites");
     } else if (proteinExpressed < CONNECT_AXON_START) {
-      debug("Block conect dendrites");
+		addProteinIntoTheMix(this.proteins, Proteins.BLOCK_CONNECT_DENDRITES, (proteinExpressed - BLOCK_CONNECT_DENDRITES_START) + 1);
+		debug("Block conect dendrites");
     } else if (proteinExpressed < BLOCK_CONNECT_AXON_START) {
-      debug("Axon start");
+		addProteinIntoTheMix(this.proteins, Proteins.CONNECT_AXON, (proteinExpressed - CONNECT_AXON_START) + 1);
+		debug("Axon start");
     } else if (proteinExpressed < ACCEPT_DENDRITES_START) {
-      debug("Block connect axon");
+		addProteinIntoTheMix(this.proteins, Proteins.BLOCK_CONNECT_AXON, (proteinExpressed - BLOCK_CONNECT_AXON_START) + 1);
+		debug("Block connect axon");
     } else if (proteinExpressed < BLOCK_ACCEPT_DENDRITES_START) {
-      debug("Accept dendrites start");
+		addProteinIntoTheMix(this.proteins, Proteins.ACCEPT_DENDRITES, (proteinExpressed - ACCEPT_DENDRITES_START) + 1);
+		debug("Accept dendrites start");
     } else if (proteinExpressed < MOTOR_CELL_START) {
-      debug("Block accept dendrites");
+		addProteinIntoTheMix(this.proteins, Proteins.BLOCK_ACCEPT_DENDRITES, (proteinExpressed - BLOCK_ACCEPT_DENDRITES_START) + 1);
+		debug("Block accept dendrites");
     } else if (proteinExpressed < OPTICAL_CELL_START) {
-      debug("Motor cell");
-    } else if (proteinExpressed < ALL_PROTEINS_LENGTH) {
-      debug("Optical cell");
+		addProteinIntoTheMix(this.proteins, Proteins.MOTOR_CELL, (proteinExpressed - MOTOR_CELL_START) + 1);
+		debug("Motor cell");
+    } else if (proteinExpressed < NO_PROTEIN_START) {
+		addProteinIntoTheMix(this.proteins, Proteins.OPTICAL_CELL, (proteinExpressed - OPTICAL_CELL_START) + 1);
+		debug("Optical cell");
     }
-
-/*
-    switch(this.dna[gene]) {
-      case Proteins.REDUCES_PROTEINS:
-        this.proteins[Proteins.REDUCES_PROTEINS] = 3;
-        break;
-      case Proteins.START_CELL_DIVISION:
-        this.proteins[Proteins.START_CELL_DIVISION] = 1;
-        break;
-      case Proteins.NEURON:
-        this.proteins[Proteins.NEURON] = 1;
-        break;
-      case Proteins.CONNECT_DENDRITES:
-        this.proteins[Proteins.CONNECT_DENDRITES] = 1;
-        break;
-      case Proteins.DISCONNECT_DENDRITES:
-        this.proteins[Proteins.DISCONNECT_DENDRITES] = 1;
-        break;
-      case Proteins.DISCONNECT_DENDRITES_3:
-        this.proteins[Proteins.DISCONNECT_DENDRITES] = 3;
-        break;
-      case Proteins.DISCONNECT_DENDRITES_5:
-        this.proteins[Proteins.DISCONNECT_DENDRITES] = 5;
-        break;
-      case Proteins.BLOCK_CONNECT_DENDRITES:
-        this.proteins[Proteins.BLOCK_CONNECT_DENDRITES] = 1;
-        break;
-      case Proteins.BLOCK_CONNECT_DENDRITES_3:
-        this.proteins[Proteins.BLOCK_CONNECT_DENDRITES] = 3;
-        break;
-      case Proteins.BLOCK_CONNECT_DENDRITES_5:
-        this.proteins[Proteins.BLOCK_CONNECT_DENDRITES] = 5;
-        break;
-      case Proteins.CONNECT_AXON:
-        this.proteins[Proteins.CONNECT_AXON] = 1;
-        break;
-      case Proteins.CONNECT_AXON_5:
-        this.proteins[Proteins.CONNECT_AXON] = 5;
-        break;
-      case Proteins.BLOCK_CONNECT_AXON:
-        this.proteins[Proteins.BLOCK_CONNECT_AXON] = 1;
-        break;
-      case Proteins.BLOCK_CONNECT_AXON_3:
-        this.proteins[Proteins.BLOCK_CONNECT_AXON] = 3;
-        break;
-      case Proteins.ACCEPT_DENDRITES:
-        this.proteins[Proteins.ACCEPT_DENDRITES] = 1;
-        break;
-      case Proteins.ACCEPT_DENDRITES_5:
-        this.proteins[Proteins.ACCEPT_DENDRITES] = 5;
-        break;
-      case Proteins.BLOCK_ACCEPT_DENDRITES:
-        this.proteins[Proteins.BLOCK_ACCEPT_DENDRITES] = 1;
-        break;
-      case Proteins.BLOCK_ACCEPT_DENDRITES_5:
-        this.proteins[Proteins.BLOCK_ACCEPT_DENDRITES] = 5;
-        break;
-      case Proteins.DEVELOP_MOTOR_CELL:
-        this.proteins[Proteins.DEVELOP_MOTOR_CELL] = 1;
-        break;
-      case Proteins.DEVELOP_OPTICAL_CELL:
-        this.proteins[Proteins.DEVELOP_OPTICAL_CELL] = 1;
-        break;
-      default:
-        debug("A gene with no rule for expressing has been found. Setting it to multiply!");
-        this.proteins[Proteins.START_CELL_DIVISION] = 1;
-*/
-
   } else {
     debug("The DNA position " + this.positionInDna + " is outside of the size od DNA. No protein was expressed.");
   }
@@ -265,36 +211,19 @@ Cell.prototype.tick = function() {
   // run the neural network, inputs, inter, outputs
 }
 
-/*
-Calculate the protein sum mix.
+/**
+* Adds specified amount of a specified protein into the cell protein mix.
 */
-function calculateProteinMix(proteins) {
-  proteinSum = 1;
-  proteinLength = 0;
-  keys = Object.keys(proteins);
-  proteinsLength = keys.length;
-
-  if (!(proteinsLength > 0)) {
-    debug("There are no proteins in the cell");
-    return 0;
-  }
-
-  for (i = 1; i < proteinsLength + 1; i++) {
-    if (proteins[keys[i]] > 0) {
-      debug("Increasing sum by " + (keys[i]));
-      proteinLength += 1;
-      proteinSum += parseInt(keys[i]);
-    }
-  }
-  debug("Length is: " + proteinLength +  ", protein sum " + proteinSum);
-
-  if (proteinSum == 0 || proteinLength == 0) return 0;
-  proteinSum = (proteinSum / (proteinLength * 20)).toPrecision(2);
-
-  debug("Protein concentration is " + proteinSum);
-  return proteinSum;
+function addProteinIntoTheMix(proteins, protein, amount) {
+	if (proteins.hasOwnProperty(protein)) {
+		proteins[protein] += amount;
+	} 
+    else proteins[protein] = amount;
 }
 
+/**
+* Reduces the protein mix by half, rounding up. Useful when splitting up the cell.
+*/
 function reduceProteinMixByHalf(proteins) {
   Object.keys(proteins).forEach(function(key) {
     proteins[key] = proteins[key] / 2;
@@ -302,6 +231,9 @@ function reduceProteinMixByHalf(proteins) {
   });
 }
 
+/**
+* Reduces protein mix by one. Useful on every tick. Should not affect the "permanent" proteins, like neuron_protein.
+*/
 function reduceProteinMixByOne(proteins) {
   Object.keys(proteins).forEach(function(key) {
     if (proteins[key] > 1) proteins[key] -= 1;
@@ -309,6 +241,9 @@ function reduceProteinMixByOne(proteins) {
   });
 }
 
+/**
+* Returns the concentration of some protein in the cell (amount)
+*/
 function getProteinConcentration(protein) {
   //debug("Protein je: " + protein);
   if (protein !== undefined) return protein;

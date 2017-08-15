@@ -2,13 +2,13 @@ var debug = require('debug')('world');
 var Animal = require('./animal.js')
 
 var tickNr = 0;
-var INITIAL_ANIMAL_NUMBER = 7;
-var runForTicks = 30;
+var INITIAL_ANIMAL_NUMBER = 1;
+var runForTicks = 5;
 var HORIZON = 3;
 var WORLD_WIDTH = 2;
 var CHANCE_OF_FOOD = 0.1;
 var RISK_OF_DANGER = 0.1;
-var NUMBER_OF_PROTEINS = 26;
+var NUMBER_OF_PROTEINS = ALL_PROTEINS_LENGTH;
 
 
 function World() {
@@ -67,8 +67,8 @@ World.prototype.start = function() {
   }
 
   // Here, special animals are added.
-  specialDna = [6, 7, 12, 6, 17, 7, 1, 8, 8, 8, 1, 8, 8, 8 ,8 ,8 ,8 ,8 ,8 ,7, 6];
-  this.animals.push(new Animal(specialDna, INITIAL_ANIMAL_NUMBER, this));
+  // specialDna = [6, 7, 12, 6, 17, 7, 1, 8, 8, 8, 1, 8, 8, 8 ,8 ,8 ,8 ,8 ,8 ,7, 6];
+  // this.animals.push(new Animal(specialDna, INITIAL_ANIMAL_NUMBER, this));
 
   // Populate the view with food and danger
   for (i = 0; i < HORIZON; i++) {
