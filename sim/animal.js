@@ -18,7 +18,7 @@ function Animal(dna, id, parent) {
   // Initiate the original cell to the original values
   this.health = 100;
   // Create the initial cell
-  this.cells.push(new Cell(this.id + "_" + this.cells.length, this, this.dna, {}));
+  this.cells.push(new Cell(this.id + "_" + this.cells.length, this, this.dna, {}, 0));
 }
 
 Animal.prototype.tick = function() {
@@ -81,13 +81,12 @@ Animal.prototype.tick = function() {
   debug("Amimal " + this.id + " has " + this.cells.length + " cells, health of " + this.health + ".");
 }
 
-Animal.prototype.createNewCell = function(dna, proteins) {
+Animal.prototype.createNewCell = function(dna, proteins, cellType) {
   // Instead of adding cells immediately, we'll mark the ones that want to spawn and
   // add them to the animal in the end.
   var newCellName = this.id + "_" + (this.cells.length + this.newCells.length);
   debug("Adding a new cell with id " + newCellName + " to the animal.");
-  this.newCells.push(new Cell(newCellName, this, dna, proteins));
-
+  this.newCells.push(new Cell(newCellName, this, dna, proteins, cellType));
 }
 
 Animal.prototype.addForRemoval = function(cell) {

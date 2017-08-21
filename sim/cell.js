@@ -5,6 +5,7 @@ var markedForDeath;
 var debug = require('debug')('cell');
 var proteins = {};
 var cellAge;
+var cellType;
 var AGE_WHEN_CELL_CAN_DIE = 100;
 var RISK_OF_CELL_DEATH_OF_OLD_AGE = 0.02
 
@@ -57,7 +58,14 @@ var Proteins = {
   DEVELOP_OPTICAL_CELL:     OPTICAL_CELL_START,              // Upon cell division, the daughter cell becomes optical cell.
 };
 
-function Cell(id, parent, dna, proteins) {
+var CellTypes = {
+  NONE : 0,
+  NEURON : 1,
+  MOTOR: 2,
+  OPTICAL: 3
+}
+
+function Cell(id, parent, dna, proteins, cellType) {
   this.cellAge = 0;
   this.id = id;
   this.dna = dna;
@@ -65,8 +73,9 @@ function Cell(id, parent, dna, proteins) {
   this.proteins = proteins;   // this is the protein map - needs to be halved for the more realistic scenario.
   this.parentAnimal = parent;
   this.positionInDna = 0;
-  debug("New cell is born with name: " + this.id);
-  debug("DNA is: " + this.dna);
+  this.cellType = cellType;
+  debug("New cell is born with name: " + this.id + " and cell type " + this.cellType);
+  //debug("DNA is: " + this.dna);
 }
 
 /**
@@ -74,7 +83,8 @@ function Cell(id, parent, dna, proteins) {
 */
 Cell.prototype.hasProtein = function(protein) {
     //debug("Checking if protein" + protein + " exists in the cell.");
-    if (protein in Object.keys(this.proteins)) {
+
+    if (this.proteins.hasOwnProperty(protein)) {
       //debug("Protein is in the cell with concentration " + this.proteins[protein]);
       return this.proteins[protein] >= 1;
     }
@@ -121,7 +131,7 @@ Cell.prototype.tick = function() {
 		debug('division.');
     } else if (proteinExpressed < CONNECT_DENDRITES_START) {
 		addProteinIntoTheMix(this.proteins, Proteins.NEURON, 1);
-		debug("Neuron");
+		debug("Neuron ======================================================");
     } else if (proteinExpressed < DISCONNECT_DENDRITES_START) {
 		addProteinIntoTheMix(this.proteins, Proteins.CONNECT_DENDRITES, (proteinExpressed - CONNECT_DENDRITES_START) + 1);
 		debug("Connect dendrites");
@@ -144,10 +154,10 @@ Cell.prototype.tick = function() {
 		addProteinIntoTheMix(this.proteins, Proteins.BLOCK_ACCEPT_DENDRITES, (proteinExpressed - BLOCK_ACCEPT_DENDRITES_START) + 1);
 		debug("Block accept dendrites");
     } else if (proteinExpressed < OPTICAL_CELL_START) {
-		addProteinIntoTheMix(this.proteins, Proteins.MOTOR_CELL, (proteinExpressed - MOTOR_CELL_START) + 1);
+		addProteinIntoTheMix(this.proteins, Proteins.DEVELOP_MOTOR_CELL, (proteinExpressed - MOTOR_CELL_START) + 1);
 		debug("Motor cell");
     } else if (proteinExpressed < NO_PROTEIN_START) {
-		addProteinIntoTheMix(this.proteins, Proteins.OPTICAL_CELL, (proteinExpressed - OPTICAL_CELL_START) + 1);
+		addProteinIntoTheMix(this.proteins, Proteins.DEVELOP_OPTICAL_CELL, (proteinExpressed - OPTICAL_CELL_START) + 1);
 		debug("Optical cell");
     }
   } else {
@@ -156,6 +166,11 @@ Cell.prototype.tick = function() {
 
   // increase positionInDna
   this.positionInDna += 1;
+
+  if (this.hasProtein(Proteins.NEURON)) {
+    debug("I am a neuron cell!");
+    this.cellType = CellTypes.NEURON;
+  }
 
   // Now, do actions for all proteins found in the cell
   if (this.hasProtein(Proteins.REDUCES_PROTEINS)) {
@@ -173,13 +188,11 @@ Cell.prototype.tick = function() {
     Object.keys(this.proteins).forEach(function(key) {
       newCellProtein[key] = that.proteins[key];
     });
-    this.parentAnimal.createNewCell(this.dna, this.proteins);
+    this.parentAnimal.createNewCell(this.dna, this.proteins, this.cellType);
     this.parentAnimal.health -= 1; // Reduce the health upon birth
   }
 
-  if (this.hasProtein(Proteins.NEURON)) {
-    debug("I am a neuron cell!");
-
+  if (this.cellType == CellTypes.NEURON) {
     if (this.hasProtein(Proteins.CONNECT_DENDRITES)) {
       debug("Connecting dendrites");
     }
@@ -198,10 +211,12 @@ Cell.prototype.tick = function() {
 
     if (this.hasProtein(Proteins.DEVELOP_MOTOR_CELL)) {
       debug("I'm a motor cell!");
+      this.cellType = CellTypes.MOTOR;
     }
 
     if (this.hasProtein(Proteins.DEVELOP_OPTICAL_CELL)) {
       debug("I'm a optical cell!");
+      this.cellType = CellTypes.OPTICAL;
     }
   }
 
@@ -217,8 +232,9 @@ Cell.prototype.tick = function() {
 function addProteinIntoTheMix(proteins, protein, amount) {
 	if (proteins.hasOwnProperty(protein)) {
 		proteins[protein] += amount;
-	} 
+	}
     else proteins[protein] = amount;
+  debug("Added protein " + protein + " amount of " + amount);
 }
 
 /**

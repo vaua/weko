@@ -2,8 +2,8 @@ var debug = require('debug')('world');
 var Animal = require('./animal.js')
 
 var tickNr = 0;
-var INITIAL_ANIMAL_NUMBER = 1;
-var runForTicks = 5;
+var INITIAL_ANIMAL_NUMBER = 5;
+var runForTicks = 50;
 var HORIZON = 3;
 var WORLD_WIDTH = 2;
 var CHANCE_OF_FOOD = 0.1;
