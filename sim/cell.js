@@ -6,8 +6,10 @@ var debug = require('debug')('cell');
 var proteins = {};
 var cellAge;
 var cellType;
+var active;
 var AGE_WHEN_CELL_CAN_DIE = 100;
 var RISK_OF_CELL_DEATH_OF_OLD_AGE = 0.02
+var NEURON_FIRING_THRESHOLD = 1;
 
 // Proteins definitions
 var REDUCTION_START = 0;
@@ -74,7 +76,23 @@ function Cell(id, parent, dna, proteins, cellType) {
   this.parentAnimal = parent;
   this.positionInDna = 0;
   this.cellType = cellType;
+  this.active = false;
+  this.incomingDendrites = [];
   debug("New cell is born with name: " + this.id + " and cell type " + this.cellType);
+
+  // Handle neural cells
+  if (this.cellType > 0) {  // TODO: Fix this ugly shortcut comparison to proper cell type check
+    debug("We got ourselves a cool neural extended cell!");
+    this.parentAnimal.addNeuralCell(this);
+
+    if (this.cellType === CellTypes.MOTOR) {
+      this.parentAnimal.addMotorCell(this);
+    }
+
+    if (this.cellType === CellTypes.OPTICAL) {
+      this.parentAnimal.addOpticalCell(this);
+    }
+  }
   //debug("DNA is: " + this.dna);
 }
 
@@ -89,6 +107,24 @@ Cell.prototype.hasProtein = function(protein) {
       return this.proteins[protein] >= 1;
     }
     else return false;
+}
+
+Cell.prototype.addIncomingDendrites = function(dendrites) {
+  this.incomingDendrites.push(...dendrites);
+}
+
+Cell.prototype.isActive = function() {
+  return active;
+}
+
+Cell.prototype.setActive = function(activeInputs) {
+  if (activeInputs > NEURON_FIRING_THRESHOLD) {
+    this.active = true;
+    debug("Cell is firing!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!===========================================!!!!!!!!!!!!!!!!!!!!");
+  }
+  else {
+    this.active = false;
+  }
 }
 
 /**
@@ -131,7 +167,7 @@ Cell.prototype.tick = function() {
 		debug('division.');
     } else if (proteinExpressed < CONNECT_DENDRITES_START) {
 		addProteinIntoTheMix(this.proteins, Proteins.NEURON, 1);
-		debug("Neuron ======================================================");
+		debug("Neuron");
     } else if (proteinExpressed < DISCONNECT_DENDRITES_START) {
 		addProteinIntoTheMix(this.proteins, Proteins.CONNECT_DENDRITES, (proteinExpressed - CONNECT_DENDRITES_START) + 1);
 		debug("Connect dendrites");
@@ -192,21 +228,26 @@ Cell.prototype.tick = function() {
     this.parentAnimal.health -= 1; // Reduce the health upon birth
   }
 
+  //TODO: Some of the checks in here will need to be splitted out for optical, motor cells.
   if (this.cellType == CellTypes.NEURON) {
     if (this.hasProtein(Proteins.CONNECT_DENDRITES)) {
       debug("Connecting dendrites");
+      this.parentAnimal.addCellWithWillingDendrites(this);
     }
 
     if (this.hasProtein(Proteins.ACCEPT_DENDRITES)) {
       debug("Accepting dendrites");
+      this.parentAnimal.addCellAcceptingDendrites(this);
     }
 
     if (this.hasProtein(Proteins.DICCONNECT_DENDRITES)) {
       debug("Disconnecting dendrites");
+      //TODO: Implement
     }
 
     if (this.hasProtein(Proteins.CONNECT_AXON)) {
       debug("Connecting Axon!");
+      //TODO: Most likely remove.
     }
 
     if (this.hasProtein(Proteins.DEVELOP_MOTOR_CELL)) {

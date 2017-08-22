@@ -15,6 +15,11 @@ function Animal(dna, id, parent) {
   this.id = id;
   this.world = parent;
   this.cells = [];
+  this.cellsWithWillingDendrites = [];
+  this.cellsAcceptingDendrites = [];
+  this.neuralCells = [];
+  this.opticalCells = [];
+  this.motorCells = [];
   // Initiate the original cell to the original values
   this.health = 100;
   // Create the initial cell
@@ -24,6 +29,7 @@ function Animal(dna, id, parent) {
 Animal.prototype.tick = function() {
   // Express genes == grow the body
   //var tempFluidConcentration = 0;
+  var that = this;
   this.newCells = [];
   this.deadCells = [];
 
@@ -74,10 +80,29 @@ Animal.prototype.tick = function() {
     }
   }
 
-  // Reduce animal health every step - this will need to wait for a way to increase health somehow.
+  //TODO: Reduce animal health every step - this will need to wait for a way to increase health somehow.
 
-  //fluidConcentation = tempFluidConcentration / cells.length;
-  // run the neural network, inputs, inter, outputs
+  // Adjust the cell connections - connect every willing cell with every willing dendrite
+  this.cellsAcceptingDendrites.forEach(function(cell) {
+    cell.addIncomingDendrites(that.cellsWithWillingDendrites);
+  });
+  // Now wipe these two lists as we have added all needed connections
+  this.cellsAcceptingDendrites = [];
+  this.cellsWithWillingDendrites = [];
+
+  // Now, all cells have ticked. Let's run the neural network.
+  this.neuralCells.forEach(function(cell) {
+    var sumOfInputs = 0;
+    cell.incomingDendrites.forEach(function(dendriteCell) {
+      if (dendriteCell.isActive()) {
+        debug("Found active input cell!");
+        sumOfInputs += 1;
+      }
+    });
+    debug("Calculate sum of inputs: " + sumOfInputs);
+    cell.setActive(sumOfInputs);
+  });
+
   debug("Amimal " + this.id + " has " + this.cells.length + " cells, health of " + this.health + ".");
 }
 
@@ -93,5 +118,24 @@ Animal.prototype.addForRemoval = function(cell) {
   this.deadCells.push(cell);
 }
 
+Animal.prototype.addNeuralCell = function(cell) {
+  this.neuralCells.push(cell);
+}
+
+Animal.prototype.addMotorCell = function(cell) {
+  this.motorCells.push(cell);
+}
+
+Animal.prototype.addOpticalCell = function(cell) {
+  this.opticalCells.push(cell);
+}
+
+Animal.prototype.addCellWithWillingDendrites = function(cell) {
+  this.cellsWithWillingDendrites.push(cell);
+}
+
+Animal.prototype.addCellAcceptingDendrites = function(cell) {
+  this.cellsAcceptingDendrites.push(cell);
+}
 
 module.exports = Animal;
