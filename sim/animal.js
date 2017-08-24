@@ -1,6 +1,5 @@
 var id;
 var dna;
-var cells = [];
 var newCells = [];
 var deadCells = [];
 var Cell = require("./cell.js");
@@ -35,17 +34,8 @@ Animal.prototype.tick = function() {
 
   var that = this;
   this.cells.forEach(function(cell) {
-    debug("Ticking a cell with id: " + cell.id + ".");
+    //debug("Ticking a cell with id: " + cell.id + ".");
     cell.tick();
-    // Animal has some fluid concentration, cells have one each. If cell is 100% open,
-    // it will add all its full contribution to the cell.
-    // Question is - how much "mass" is the cell fluid, and how much is the cells?
-    // Plan 1: no mass. So the sum of the cells is all volume. But this does not work.
-    // Plan 2: Same mass in as out. So, if one cell, then initially in=out=0.5.
-    // If in changes to 0.4, and is 10% open then it will let in 10% of the difference in
-    // which is (0.5-0.4)*0.1=0.01 => 0.41 inne. Ute då? Eftersom samma mass, då är ute 0.49.
-    // This is too difficult. Let's ignore the external fluid concentration for now.
-    //that.tempFluidConcentration += (cell.fluidConcentation * cell.openness);
   });
 
   //this.fluidConcentation += that.fluidConcentation / this.cells.length;
@@ -85,25 +75,34 @@ Animal.prototype.tick = function() {
   // Adjust the cell connections - connect every willing cell with every willing dendrite
   this.cellsAcceptingDendrites.forEach(function(cell) {
     cell.addIncomingDendrites(that.cellsWithWillingDendrites);
+    debug("Added " + that.cellsWithWillingDendrites.length + " to cell with id " + cell.id);
   });
   // Now wipe these two lists as we have added all needed connections
   this.cellsAcceptingDendrites = [];
   this.cellsWithWillingDendrites = [];
 
   // Now, all cells have ticked. Let's run the neural network.
+  //var allInputGivingCells = this.neuralCells.concat(this.opticalCells);
   this.neuralCells.forEach(function(cell) {
     var sumOfInputs = 0;
+    debug("Checking cell " + cell.id + " for firing. It has " + cell.incomingDendrites.length + " incoming dendrites.");
     cell.incomingDendrites.forEach(function(dendriteCell) {
       if (dendriteCell.isActive()) {
         debug("Found active input cell!");
         sumOfInputs += 1;
       }
     });
-    debug("Calculate sum of inputs: " + sumOfInputs);
+    //debug("Calculate sum of inputs: " + sumOfInputs);
+    if (sumOfInputs > 0) debug("AJEEEE!!!!!!???==========================!!!!!!!!!!!!!!!!!!!!!!!!!===========__________________________-------------!");
     cell.setActive(sumOfInputs);
   });
 
+  this.opticalCells.forEach(function(cell) {
+      cell.setActive(199);
+  });
+
   debug("Amimal " + this.id + " has " + this.cells.length + " cells, health of " + this.health + ".");
+  debug("Above animal has " + this.neuralCells.length + " neural cells, " + this.opticalCells.length + " optical cells and " + this.motorCells.length + " motor cells.");
 }
 
 Animal.prototype.createNewCell = function(dna, proteins, cellType) {

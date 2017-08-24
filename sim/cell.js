@@ -114,7 +114,7 @@ Cell.prototype.addIncomingDendrites = function(dendrites) {
 }
 
 Cell.prototype.isActive = function() {
-  return active;
+  return this.active;
 }
 
 Cell.prototype.setActive = function(activeInputs) {
@@ -229,13 +229,13 @@ Cell.prototype.tick = function() {
   }
 
   //TODO: Some of the checks in here will need to be splitted out for optical, motor cells.
-  if (this.cellType == CellTypes.NEURON) {
-    if (this.hasProtein(Proteins.CONNECT_DENDRITES)) {
+  if (this.cellType > CellTypes.NONE) {
+    if (this.hasProtein(Proteins.CONNECT_DENDRITES) && this.cellType != CellTypes.MOTOR) {  // Motor cell has no dendrites - its firing affects the movement
       debug("Connecting dendrites");
       this.parentAnimal.addCellWithWillingDendrites(this);
     }
 
-    if (this.hasProtein(Proteins.ACCEPT_DENDRITES)) {
+    if (this.hasProtein(Proteins.ACCEPT_DENDRITES) && this.cellType != CellTypes.OPTICAL) { // Optical cells need no incoming dendrites - they are driven by inputs directly
       debug("Accepting dendrites");
       this.parentAnimal.addCellAcceptingDendrites(this);
     }
@@ -250,13 +250,13 @@ Cell.prototype.tick = function() {
       //TODO: Most likely remove.
     }
 
-    if (this.hasProtein(Proteins.DEVELOP_MOTOR_CELL)) {
-      debug("I'm a motor cell!");
+    if (this.hasProtein(Proteins.DEVELOP_MOTOR_CELL) && (this.cellType == CellTypes.NEURON)) { // If this is plane neuron, now it will become motor cell
+      debug("I'm a motor cell now!");
       this.cellType = CellTypes.MOTOR;
     }
 
-    if (this.hasProtein(Proteins.DEVELOP_OPTICAL_CELL)) {
-      debug("I'm a optical cell!");
+    if (this.hasProtein(Proteins.DEVELOP_OPTICAL_CELL) && (this.cellType == CellTypes.NEURON)) { // If this is a plane neuron, now it will become optical cell
+      debug("I'm an optical cell now!");
       this.cellType = CellTypes.OPTICAL;
     }
   }
