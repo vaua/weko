@@ -83,7 +83,9 @@ function Cell(id, parent, dna, proteins, cellType) {
   // Handle neural cells
   if (this.cellType > 0) {  // TODO: Fix this ugly shortcut comparison to proper cell type check
     debug("We got ourselves a cool neural extended cell!");
-    this.parentAnimal.addNeuralCell(this);
+    if (this.cellType === CellTypes.NEURON) {
+      this.parentAnimal.addNeuralCell(this);
+    }
 
     if (this.cellType === CellTypes.MOTOR) {
       this.parentAnimal.addMotorCell(this);
@@ -120,7 +122,7 @@ Cell.prototype.isActive = function() {
 Cell.prototype.setActive = function(activeInputs) {
   if (activeInputs > NEURON_FIRING_THRESHOLD) {
     this.active = true;
-    debug("Cell is firing!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!===========================================!!!!!!!!!!!!!!!!!!!!");
+    debug("Cell is firing.");
   }
   else {
     this.active = false;
@@ -133,6 +135,7 @@ Cell.prototype.setActive = function(activeInputs) {
 Cell.prototype.tick = function() {
   var that = this;
   this.cellAge += 1;
+  this.active = false;
   debug("Cell " + this.id + " is entering its " + this.cellAge + " tick.");
 
   // check cell age and kill cell if it dies.

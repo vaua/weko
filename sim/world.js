@@ -2,12 +2,14 @@ var debug = require('debug')('world');
 var Animal = require('./animal.js')
 
 var tickNr = 0;
-var INITIAL_ANIMAL_NUMBER = 10;
-var runForTicks = 50;
+var MINIMAL_ANIMAL_NUMBER = 30;
+var runForTicks = 150;
 var HORIZON = 3;
+var DNA_MIN_SIZE = 10;
+var DNA_MAX_SIZE = 400;
 var WORLD_WIDTH = 2;
-var CHANCE_OF_FOOD = 0.1;
-var RISK_OF_DANGER = 0.1;
+var CHANCE_OF_FOOD = 0.3;
+var RISK_OF_DANGER = 0.3;
 var NUMBER_OF_PROTEINS = ALL_PROTEINS_LENGTH;
 
 
@@ -16,6 +18,7 @@ function World() {
   this.visibleLocations = [];
   this.pointerToView = 0;
   this.visualInput = [];
+  this.animalId = 0;
 }
 
 function transformLocationsIntoVisualInput(locations) {
@@ -30,7 +33,7 @@ function transformLocationsIntoVisualInput(locations) {
 		}  else {
 			visualInput[i * WORLD_WIDTH] = 0;
 		}
-		if (locationLayer[1] == 2 || locationLayer[0] == 3) {
+		if (locationLayer[1] == 2 || locationLayer[1] == 3) {
 			visualInput[i * WORLD_WIDTH + 1] = 1;
 		}  else {
 			visualInput[i * WORLD_WIDTH + 1] = 0;
@@ -42,7 +45,7 @@ function transformLocationsIntoVisualInput(locations) {
 		}  else {
 			visualInput[i * WORLD_WIDTH + 2] = 0;
 		}
-		if (locationLayer[1] == 1 || locationLayer[0] == 3) {
+		if (locationLayer[1] == 1 || locationLayer[1] == 3) {
 			visualInput[i * WORLD_WIDTH + 3] = 1;
 		}  else {
 			visualInput[i * WORLD_WIDTH + 3] = 0;
@@ -51,20 +54,26 @@ function transformLocationsIntoVisualInput(locations) {
 	return visualInput;
 }
 
+World.prototype.getVisualInput = function() {
+  return this.visibleLocations[this.pointerToView];
+}
 
+World.prototype.createAnimals = function(numberOfAnimalsToCreate) {
+  for (i = 0; i < numberOfAnimalsToCreate; i++) {
+    var dna = [];
+    var dnaSize = Math.floor((Math.random() * DNA_MAX_SIZE) + DNA_MIN_SIZE);
+    for (j = 0; j < dnaSize; j++) {
+      dna.push(Math.floor((Math.random() * NUMBER_OF_PROTEINS) + 1));
+    }
+    var place = Math.floor(Math.random() * WORLD_WIDTH);
+    this.animals.push(new Animal(dna, this.animalId++, place, this));
+  }
+}
 
 World.prototype.start = function() {
   // Create the world
   // First the animals
   debug("Simulation started.");
-  for (i = 0; i < INITIAL_ANIMAL_NUMBER; i++) {
-    var dna = [];
-    var dnaSize = Math.floor((Math.random() * 90) + 10);
-    for (j = 0; j < dnaSize; j++) {
-      dna.push(Math.floor((Math.random() * NUMBER_OF_PROTEINS) + 1));
-    }
-    this.animals.push(new Animal(dna, i, this));
-  }
 
   // Here, special animals are added.
   // specialDna = [6, 7, 12, 6, 17, 7, 1, 8, 8, 8, 1, 8, 8, 8 ,8 ,8 ,8 ,8 ,8 ,7, 6];
@@ -91,6 +100,12 @@ World.prototype.start = function() {
   while(tickNr != runForTicks) {
     tickNr++;
     debug("Started world tick " + tickNr + " with " + this.animals.length + " animals in the world.");
+    // Now, catch up to the minimal animal level
+    if (this.animals.length < MINIMAL_ANIMAL_NUMBER) {
+      this.createAnimals(MINIMAL_ANIMAL_NUMBER - this.animals.length);
+      debug("Added " + (MINIMAL_ANIMAL_NUMBER - this.animals.length) + " new animals.");
+    }
+
     //debug("First row: " + this.visibleLocations[this.pointerToView][0] + "," + this.visibleLocations[this.pointerToView][1]);
 	  //debug("Visual input is: " + this.visualInput);
 
@@ -122,6 +137,8 @@ World.prototype.start = function() {
     // Increase the pointerToView
     this.pointerToView = (this.pointerToView + 1) % HORIZON;
 	this.visualInput = transformLocationsIntoVisualInput(this.visibleLocations);
+  debug("Visible localtions: " + this.visibleLocations);
+  debug("Visual input is: " + this.visualInput);
   }
 }
 
