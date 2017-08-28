@@ -58,7 +58,11 @@ World.prototype.getVisualInput = function() {
   return this.visibleLocations[this.pointerToView];
 }
 
-World.prototype.createAnimals = function(numberOfAnimalsToCreate) {
+World.prototype.createAnimal = function(initialCell, position) {
+	this.animals.push(new Animal(initialCell, this.animalId++, position, this));
+}
+
+World.prototype.createRandomAnimals = function(numberOfAnimalsToCreate) {
   for (i = 0; i < numberOfAnimalsToCreate; i++) {
     var dna = [];
     var dnaSize = Math.floor((Math.random() * DNA_MAX_SIZE) + DNA_MIN_SIZE);
@@ -102,8 +106,8 @@ World.prototype.start = function() {
     debug("Started world tick " + tickNr + " with " + this.animals.length + " animals in the world.");
     // Now, catch up to the minimal animal level
     if (this.animals.length < MINIMAL_ANIMAL_NUMBER) {
-      this.createAnimals(MINIMAL_ANIMAL_NUMBER - this.animals.length);
-      debug("Added " + (MINIMAL_ANIMAL_NUMBER - this.animals.length) + " new animals.");
+      debug("Will create " + (MINIMAL_ANIMAL_NUMBER - this.animals.length) + " new animals.");
+	  this.createRandomAnimals(MINIMAL_ANIMAL_NUMBER - this.animals.length);
     }
 
     //debug("First row: " + this.visibleLocations[this.pointerToView][0] + "," + this.visibleLocations[this.pointerToView][1]);

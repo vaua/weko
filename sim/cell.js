@@ -38,7 +38,9 @@ var MOTOR_CELL_START = BLOCK_ACCEPT_DENDRITES_START + BLOCK_ACCEPT_DENDRITES_LEN
 var MOTOR_CELL_LENGTH = 10;
 var OPTICAL_CELL_START = MOTOR_CELL_START + MOTOR_CELL_LENGTH;
 var OPTICAL_CELL_LENGTH = 10;
-var NO_PROTEIN_START = OPTICAL_CELL_START + OPTICAL_CELL_LENGTH;
+var SPAWN_ANIMAL_START = OPTICAL_CELL_START + OPTICAL_CELL_LENGTH;
+var SPAWN_ANIMAL_LENGTH = 10;
+var NO_PROTEIN_START = SPAWN_ANIMAL_START + SPAWN_ANIMAL_LENGTH;
 var NO_PROTEIN_LENGTH = 10;
 
 ALL_PROTEINS_LENGTH = NO_PROTEIN_START + NO_PROTEIN_LENGTH;
@@ -58,6 +60,7 @@ var Proteins = {
   BLOCK_ACCEPT_DENDRITES:   BLOCK_ACCEPT_DENDRITES_START,    // Blocks acceptance for dendrites
   DEVELOP_MOTOR_CELL:       MOTOR_CELL_START,                // Upon new cell division, this cell becomes motor cell
   DEVELOP_OPTICAL_CELL:     OPTICAL_CELL_START,              // Upon cell division, the daughter cell becomes optical cell.
+  SPAWN_ANIMAL:				SPAWN_ANIMAL_START
 };
 
 var CellTypes = {
@@ -195,9 +198,12 @@ Cell.prototype.tick = function() {
     } else if (proteinExpressed < OPTICAL_CELL_START) {
 		addProteinIntoTheMix(this.proteins, Proteins.DEVELOP_MOTOR_CELL, (proteinExpressed - MOTOR_CELL_START) + 1);
 		debug("Motor cell");
-    } else if (proteinExpressed < NO_PROTEIN_START) {
+    } else if (proteinExpressed < SPAWN_ANIMAL_START) {
 		addProteinIntoTheMix(this.proteins, Proteins.DEVELOP_OPTICAL_CELL, (proteinExpressed - OPTICAL_CELL_START) + 1);
 		debug("Optical cell");
+    } else if (proteinExpressed < NO_PROTEIN_START) {
+		addProteinIntoTheMix(this.proteins, Proteins.SPAWN_ANIMAL, 1);
+		debug("Spawning new animal.");
     }
   } else {
     debug("The DNA position " + this.positionInDna + " is outside of the size od DNA. No protein was expressed.");
@@ -206,9 +212,25 @@ Cell.prototype.tick = function() {
   // increase positionInDna
   this.positionInDna += 1;
 
-  if (this.hasProtein(Proteins.NEURON)) {
+  if (this.hasProtein(Proteins.NEURON) && this.cellType == CellTypes.NONE) {
     debug("I am a neuron cell!");
     this.cellType = CellTypes.NEURON;
+  }
+  
+  
+  if (this.hasProtein(Proteins.SPAWN_ANIMAL)) {
+    debug("Spawning!");
+    debug("First, create a new cell!");
+    //TODO: Reduce protein mix to half before spawing the cell.
+    reduceProteinMixByHalf(this.proteins);
+
+    // copy the proteins, TODO: reduce the number
+    var newCellProtein = {};
+    Object.keys(this.proteins).forEach(function(key) {
+      newCellProtein[key] = that.proteins[key];
+    });
+    this.parentAnimal.spawnNewAnimal(this.dna, this.proteins, this.cellType);
+    this.parentAnimal.health -= 10; // Reduce the health upon birth, significantly
   }
 
   // Now, do actions for all proteins found in the cell

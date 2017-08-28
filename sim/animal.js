@@ -28,6 +28,25 @@ function Animal(dna, id, position, world) {
   this.cells.push(new Cell(this.id + "_" + this.cells.length, this, this.dna, {}, 0));
 }
 
+function Animal(initialCell, id, position, world) {
+  this.dna = initialCell.dna;
+  this.id = id;
+  this.world = world;
+  this.cells = [initialCell];
+  this.cellsWithWillingDendrites = [];
+  this.cellsAcceptingDendrites = [];
+  this.neuralCells = []; // Maybe the initial cell needs to be added to some of these....
+  this.opticalCells = [];
+  this.motorCells = [];
+  this.position = position;
+  // Initiate the original cell to the original values
+  this.health = 100;
+  //Fix initial cell id now that we have animal ID
+  initialCell.id = this.id + "_" + this.cells.length;
+  // Fix initial cells parent animal to this one.
+  initialCell.parent = this;
+}
+
 Animal.prototype.tick = function() {
   // Express genes == grow the body
   //var tempFluidConcentration = 0;
@@ -38,6 +57,8 @@ Animal.prototype.tick = function() {
   var that = this;
   this.cells.forEach(function(cell) {
     //debug("Ticking a cell with id: " + cell.id + ".");
+	if (cell === undefined) debug("The cell is undefined.");
+	else debug("Running cell " + cell.id);
     cell.tick();
   });
 
@@ -72,8 +93,6 @@ Animal.prototype.tick = function() {
       debug("Did not find the animal - should not have happened!");
     }
   }
-
-  //TODO: Reduce animal health every step - this will need to wait for a way to increase health somehow.
 
   // Adjust the cell connections - connect every willing cell with every willing dendrite
   this.cellsAcceptingDendrites.forEach(function(cell) {
@@ -136,6 +155,17 @@ Animal.prototype.tick = function() {
   if (activeCells > 0 ) debug(activeCells + " of " + this.motorCells.length + " motor cells are active!");
 
   // Move the animal
+  var direction = 0;
+  i=0;
+  this.motorCells.forEach(function(cell){
+	  if (cell.isActive()) if (i%2 == 0) direction +=1; else direction-=1;
+  });
+  if (direction != 0) {
+	debug("Motor cells active! We're moving towards: " + direction);
+	this.position += direction;
+	if (this.position < 0) this.position = 0;
+	if (this.position > 1) this.position = 1;
+  } 
 
   // Apply the food / danger
   if (this.position == 0) {
@@ -160,6 +190,10 @@ Animal.prototype.createNewCell = function(dna, proteins, cellType) {
   var newCellName = this.id + "_" + (this.cells.length + this.newCells.length);
   //debug("Adding a new cell with id " + newCellName + " to the animal.");
   this.newCells.push(new Cell(newCellName, this, dna, proteins, cellType));
+}
+
+Animal.prototype.spawnNewAnimal = function(dna, proteins, cellType) {
+	this.world.createNewAnimal(new Cell("newbie", this, dna, proteins, cellType), this.position);
 }
 
 Animal.prototype.addForRemoval = function(cell) {
