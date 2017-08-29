@@ -11,7 +11,7 @@ var HEALTH_GAIN_WHEN_FOOD = 5;
 var HEALTH_LOSS_WHEN_DANGER = 7;
 
 
-function Animal(dna, id, position, world) {
+function Animal(dna, id, position, world, initialCell) {
   this.dna = dna;
   this.id = id;
   this.world = world;
@@ -25,26 +25,21 @@ function Animal(dna, id, position, world) {
   // Initiate the original cell to the original values
   this.health = 100;
   // Create the initial cell
-  this.cells.push(new Cell(this.id + "_" + this.cells.length, this, this.dna, {}, 0));
-}
-
-function Animal(initialCell, id, position, world) {
-  this.dna = initialCell.dna;
-  this.id = id;
-  this.world = world;
-  this.cells = [initialCell];
-  this.cellsWithWillingDendrites = [];
-  this.cellsAcceptingDendrites = [];
-  this.neuralCells = []; // Maybe the initial cell needs to be added to some of these....
-  this.opticalCells = [];
-  this.motorCells = [];
-  this.position = position;
-  // Initiate the original cell to the original values
-  this.health = 100;
-  //Fix initial cell id now that we have animal ID
-  initialCell.id = this.id + "_" + this.cells.length;
-  // Fix initial cells parent animal to this one.
-  initialCell.parent = this;
+  if (initialCell === undefined) {
+	this.cells.push(new Cell(this.id + "_" + this.cells.length, this, this.dna, {}, 0));
+  } else {
+	initialCell.id = this.id + "_" + this.cells.length;
+	initialCell.parent = this;
+	if (initialCell.cellType == CellTypes.NEURON) {
+		this.neuralCells.push(initialCell);
+	} else if (initialCell.cellType == CellTypes.OPTICAL) {
+		this.opticalCells.push(initialCell);
+	} else if (initialCell.cellType == CellTypes.MOTOR) {
+		this.motorCells.push(initialCell);
+	}
+	
+	this.cells.push(initialCell);
+  }
 }
 
 Animal.prototype.tick = function() {
@@ -193,7 +188,7 @@ Animal.prototype.createNewCell = function(dna, proteins, cellType) {
 }
 
 Animal.prototype.spawnNewAnimal = function(dna, proteins, cellType) {
-	this.world.createNewAnimal(new Cell("newbie", this, dna, proteins, cellType), this.position);
+  this.world.createAnimal(new Cell("newbie", this, dna, proteins, cellType), this.position);
 }
 
 Animal.prototype.addForRemoval = function(cell) {

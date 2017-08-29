@@ -61,9 +61,9 @@ var Proteins = {
   DEVELOP_MOTOR_CELL:       MOTOR_CELL_START,                // Upon new cell division, this cell becomes motor cell
   DEVELOP_OPTICAL_CELL:     OPTICAL_CELL_START,              // Upon cell division, the daughter cell becomes optical cell.
   SPAWN_ANIMAL:				SPAWN_ANIMAL_START
-};
+}
 
-var CellTypes = {
+CellTypes = {
   NONE : 0,
   NEURON : 1,
   MOTOR: 2,

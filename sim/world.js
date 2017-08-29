@@ -59,7 +59,7 @@ World.prototype.getVisualInput = function() {
 }
 
 World.prototype.createAnimal = function(initialCell, position) {
-	this.animals.push(new Animal(initialCell, this.animalId++, position, this));
+	this.animals.push(new Animal(initialCell.dna, this.animalId++, position, this, initialCell));
 }
 
 World.prototype.createRandomAnimals = function(numberOfAnimalsToCreate) {
