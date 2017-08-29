@@ -92,5 +92,5 @@ function onListening() {
   //Start the simulation
   debug('Starting the simulation.');
   var world = new World();
-  world.start();
+  //world.start();
 }

@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Weko - world, evolution, ko</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 13px Helvetica, Arial; }
+      label {display: inline-block;
+            float: left;
+            clear: left;
+            width: 150px;
+            padding: 10px;
+            text-align: right;}
+      form { background: #aaa; padding: 3px; position: top: 0; width: 100%; }
+      form input { border: 0; position: left: 200; padding: 10px; width: 100px; margin-right: .5%; }
+      form button { width: 9%; background: rgb(0, 224, 255); border: none; padding: 10px; }
+      #messages { list-style-type: none; margin: 0; padding: 0; }
+      #messages li { padding: 5px 10px; }
+      #messages li:nth-child(odd) { background: #eee; }
+    </style>
+  </head>
+  <body>
+    <h1>Weko simulation of the free world!</h1>
+    <ul id="messages"></ul>
+    <form action="">
+      <label>Number of individuals</label> <input id="a" autocomplete="off" value="30" /><br>
+      <label>Amount of rounds</label> <input id="b" autocomplete="off" value="150"/><br>
+      <button>Start</button>
+    </form>
+  </body>
+</html>
