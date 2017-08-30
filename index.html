@@ -24,12 +24,28 @@
     <ul id="messages"></ul>
     <form action="">
       <label>Number of individuals</label> <input id="a" autocomplete="off" value="30" /><br>
-      <label>Amount of rounds</label> <input id="b" autocomplete="off" value="150"/><br>
+      <label>Amount of rounds</label> <input id="b" autocomplete="off" value="5"/><br>
       <button>Start</button>
     </form>
-    <script src="/socket.io/socket.io.js"></script>
-      <script>
-        var socket = io();
-      </script>
+	<div id="log"></div>
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+	<script>
+	$(function () {
+		var socket = io();
+		$('#log').append('Testing...');
+		$('form').submit(function(){
+		  var input = {"number" : $('#a').val(), "rounds" : $('#b').val()};
+		  socket.emit('Start', input);
+		  return false;
+		});
+		socket.on(function(msg){
+		  $('#log').append(msg);
+		});
+		socket.on('result', function(msg){
+		  $('#log').append(msg);
+		});
+	});
+	</script>
   </body>
 </html>

@@ -34,8 +34,20 @@ server.on('listening', onListening);
 * Create a IO socket connections
 **/
 var io = require('socket.io')(server);
+
 io.on('connection', function(socket){
-  console.log('a user connected');
+  debug("Connecting!");
+  io.emit('Result', 'Now we starting...');
+  socket.on('Start', function(msg){
+    console.log('Number of animals is: ' + msg.number);
+	console.log('Number of rounds is: ' + msg.rounds);
+	
+	io.emit('Result', 'Now we starting...');
+	//Start the simulation
+	debug('Starting the simulation.');
+	var world = new World(msg.number, msg.rounds, socket, io);
+	world.start();
+  });
 });
 
 /**
@@ -97,8 +109,5 @@ function onListening() {
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
 
-  //Start the simulation
-  debug('Starting the simulation.');
-  var world = new World();
-  //world.start();
+ 
 }

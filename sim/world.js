@@ -13,12 +13,17 @@ var RISK_OF_DANGER = 0.3;
 var NUMBER_OF_PROTEINS = ALL_PROTEINS_LENGTH;
 
 
-function World() {
+function World(minAnimals, ticks, socket, io) {
   this.animals = [];
   this.visibleLocations = [];
   this.pointerToView = 0;
   this.visualInput = [];
   this.animalId = 0;
+  this.socket = socket;
+  this.io = io;
+  
+  if (minAnimals !== undefined) MINIMAL_ANIMAL_NUMBER = minAnimals;
+  if (ticks !== undefined) runForTicks = ticks;
 }
 
 function transformLocationsIntoVisualInput(locations) {
@@ -141,8 +146,14 @@ World.prototype.start = function() {
     // Increase the pointerToView
     this.pointerToView = (this.pointerToView + 1) % HORIZON;
 	this.visualInput = transformLocationsIntoVisualInput(this.visibleLocations);
-  debug("Visible localtions: " + this.visibleLocations);
-  debug("Visual input is: " + this.visualInput);
+	
+	debug("Visible localtions: " + this.visibleLocations);
+	debug("Visual input is: " + this.visualInput);
+	
+	debug("Sending the socket!");
+	var result = {'tick' : this.tickNr, 'animalNr' : this.animals.length};
+	//this.socket.broadcast.emit('result', result);
+	this.io.emit('result', result);
   }
 }
 
