@@ -1,7 +1,6 @@
 var debug = require('debug')('world');
 var Animal = require('./animal.js')
 
-var tickNr = 0;
 var MINIMAL_ANIMAL_NUMBER = 30;
 var runForTicks = 150;
 var HORIZON = 3;
@@ -13,17 +12,17 @@ var RISK_OF_DANGER = 0.3;
 var NUMBER_OF_PROTEINS = ALL_PROTEINS_LENGTH;
 
 
-function World(minAnimals, ticks, socket, io) {
+function World(socket, io) {
+  this.tickNr = 0;
   this.animals = [];
+  this.animalReport = {};
   this.visibleLocations = [];
   this.pointerToView = 0;
   this.visualInput = [];
   this.animalId = 0;
   this.socket = socket;
   this.io = io;
-  
-  if (minAnimals !== undefined) MINIMAL_ANIMAL_NUMBER = minAnimals;
-  if (ticks !== undefined) runForTicks = ticks;
+  this.result = {};
 }
 
 function transformLocationsIntoVisualInput(locations) {
@@ -79,11 +78,72 @@ World.prototype.createRandomAnimals = function(numberOfAnimalsToCreate) {
   }
 }
 
-World.prototype.start = function() {
+World.prototype.reportAnimal = function(animal) {
+  this.animalReport[animal.id] = animal.report;
+}
+
+World.prototype.tick = function() {
+  this.tickNr++;
+  debug("Started world tick " + this.tickNr + " with " + this.animals.length + " animals in the world.");
+  // Now, catch up to the minimal animal level
+  if (this.animals.length < MINIMAL_ANIMAL_NUMBER) {
+    debug("Will create " + (MINIMAL_ANIMAL_NUMBER - this.animals.length) + " new animals.");
+  this.createRandomAnimals(MINIMAL_ANIMAL_NUMBER - this.animals.length);
+  }
+
+  //debug("First row: " + this.visibleLocations[this.pointerToView][0] + "," + this.visibleLocations[this.pointerToView][1]);
+  //debug("Visual input is: " + this.visualInput);
+
+  // Check if no animals left, exit
+  if (this.animals.length < 1) {
+    return;
+  }
+
+  // Run all creatures and things in the universe
+  this.animals.forEach(function(animal) {
+    animal.tick();
+  });
+
+  // Report the situation to the all listening browsers.
+
+  // create new food at the current locations
+  oneRow = [];
+  for (j = 0; j < WORLD_WIDTH; j++) {
+    if (Math.random() < CHANCE_OF_FOOD) {
+      oneRow[j] = 1;
+    }
+    else {
+      oneRow[j] = 0;
+    }
+    if (Math.random() < RISK_OF_DANGER) oneRow[j] += 2;
+  }
+
+  this.visibleLocations[this.pointerToView] = oneRow;
+  // Increase the pointerToView
+  this.pointerToView = (this.pointerToView + 1) % HORIZON;
+  this.visualInput = transformLocationsIntoVisualInput(this.visibleLocations);
+
+  debug("Visible localtions: " + this.visibleLocations);
+  debug("Visual input is: " + this.visualInput);
+
+  debug("Sending the socket!");
+  this.result.tickNr = this.tickNr;
+  this.result.animalNr = this.animals.length;
+  this.result.visualInput = this.visibleLocations[this.pointerToView];
+  this.result.animalReport = this.animalReport;
+  //this.socket.broadcast.emit('result', result);
+  debug(this.result);
+  this.io.emit('result', this.result);
+  this.socket.broadcast.emit('now', '\n');
+}
+
+World.prototype.start = function(minAnimals, ticks) {
   // Create the world
   // First the animals
   debug("Simulation started.");
 
+  if (minAnimals !== undefined) MINIMAL_ANIMAL_NUMBER = minAnimals;
+  if (ticks !== undefined) runForTicks = ticks;
   // Here, special animals are added.
   // specialDna = [6, 7, 12, 6, 17, 7, 1, 8, 8, 8, 1, 8, 8, 8 ,8 ,8 ,8 ,8 ,8 ,7, 6];
   // this.animals.push(new Animal(specialDna, INITIAL_ANIMAL_NUMBER, this));
@@ -106,54 +166,9 @@ World.prototype.start = function() {
   debug("Visible locations: " + this.visibleLocations);
 
   // Enter the eternal loop
-  while(tickNr != runForTicks) {
-    tickNr++;
-    debug("Started world tick " + tickNr + " with " + this.animals.length + " animals in the world.");
-    // Now, catch up to the minimal animal level
-    if (this.animals.length < MINIMAL_ANIMAL_NUMBER) {
-      debug("Will create " + (MINIMAL_ANIMAL_NUMBER - this.animals.length) + " new animals.");
-	  this.createRandomAnimals(MINIMAL_ANIMAL_NUMBER - this.animals.length);
-    }
+  while(this.tickNr != runForTicks) {
+    this.tick();
 
-    //debug("First row: " + this.visibleLocations[this.pointerToView][0] + "," + this.visibleLocations[this.pointerToView][1]);
-	  //debug("Visual input is: " + this.visualInput);
-
-    // Check if no animals left, exit
-    if (this.animals.length < 1) {
-      break;
-    }
-
-    // Run all creatures and things in the universe
-    this.animals.forEach(function(animal) {
-      animal.tick();
-    });
-
-    // Report the situation to the all listening browsers.
-
-    // create new food at the current locations
-    oneRow = [];
-    for (j = 0; j < WORLD_WIDTH; j++) {
-      if (Math.random() < CHANCE_OF_FOOD) {
-        oneRow[j] = 1;
-      }
-      else {
-        oneRow[j] = 0;
-      }
-      if (Math.random() < RISK_OF_DANGER) oneRow[j] += 2;
-    }
-
-    this.visibleLocations[this.pointerToView] = oneRow;
-    // Increase the pointerToView
-    this.pointerToView = (this.pointerToView + 1) % HORIZON;
-	this.visualInput = transformLocationsIntoVisualInput(this.visibleLocations);
-	
-	debug("Visible localtions: " + this.visibleLocations);
-	debug("Visual input is: " + this.visualInput);
-	
-	debug("Sending the socket!");
-	var result = {'tick' : this.tickNr, 'animalNr' : this.animals.length};
-	//this.socket.broadcast.emit('result', result);
-	this.io.emit('result', result);
   }
 }
 

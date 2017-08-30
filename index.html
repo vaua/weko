@@ -25,25 +25,37 @@
     <form action="">
       <label>Number of individuals</label> <input id="a" autocomplete="off" value="30" /><br>
       <label>Amount of rounds</label> <input id="b" autocomplete="off" value="5"/><br>
-      <button>Start</button>
+      <input type="submit" name="b1" value="Start"/>
+      <input type="submit" name="b1" value="Step"/>
+      <input type="submit" name="b1" value="Reset"/>
     </form>
-	<div id="log"></div>
+    <table style="width:20%">
+      <tr>
+        <th>Item</th>
+        <th>Value</th>
+      </tr>
+      <tr>
+        <td>Number of animals</td>
+        <td id="animalNr"></td>
+      </tr>
+      <tr>
+        <td>Tick of the world</td>
+        <td id="tickNr"></td>
+      </tr>
+    </table>
 	<script src="/socket.io/socket.io.js"></script>
 	<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
 	<script>
 	$(function () {
 		var socket = io();
-		$('#log').append('Testing...');
-		$('form').submit(function(){
+    socket.on('result', function(msg){
+      $('#animalNr').html(msg.animalNr);
+      $('#tickNr').html(msg.tickNr);
+		});
+		$('form').submit(function() {
 		  var input = {"number" : $('#a').val(), "rounds" : $('#b').val()};
 		  socket.emit('Start', input);
 		  return false;
-		});
-		socket.on(function(msg){
-		  $('#log').append(msg);
-		});
-		socket.on('result', function(msg){
-		  $('#log').append(msg);
 		});
 	});
 	</script>

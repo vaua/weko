@@ -1,10 +1,5 @@
-var id;
-var dna;
-var newCells = [];
-var deadCells = [];
 var Cell = require("./cell.js");
 var debug = require('debug')('animal');
-var health;
 
 var dnaLength = Cell.ALL_PROTEINS_LENGTH;
 var HEALTH_GAIN_WHEN_FOOD = 5;
@@ -16,12 +11,15 @@ function Animal(dna, id, position, world, initialCell) {
   this.id = id;
   this.world = world;
   this.cells = [];
+  this.newCells = [];
+  this.deadCells = [];
   this.cellsWithWillingDendrites = [];
   this.cellsAcceptingDendrites = [];
   this.neuralCells = [];
   this.opticalCells = [];
   this.motorCells = [];
   this.position = position;
+  this.report = {};
   // Initiate the original cell to the original values
   this.health = 100;
   // Create the initial cell
@@ -37,7 +35,7 @@ function Animal(dna, id, position, world, initialCell) {
 	} else if (initialCell.cellType == CellTypes.MOTOR) {
 		this.motorCells.push(initialCell);
 	}
-	
+
 	this.cells.push(initialCell);
   }
 }
@@ -160,7 +158,7 @@ Animal.prototype.tick = function() {
 	this.position += direction;
 	if (this.position < 0) this.position = 0;
 	if (this.position > 1) this.position = 1;
-  } 
+  }
 
   // Apply the food / danger
   if (this.position == 0) {
@@ -174,6 +172,14 @@ Animal.prototype.tick = function() {
     debug("The position is neither 0 or 1 but " + this.position + ". Error!");
   }
 
+  this.report.position = this.position;
+  this.report.cellNr = this.cells.length;
+  this.report.opticalCellNr = this.opticalCells.length;
+  this.report.neuralCellsNr = this.neuralCells.length;
+  this.report.motorCellsNr = this.motorCells.length;
+  this.report.health = this.health;
+
+  this.world.reportAnimal(this);
 
   debug("Animal " + this.id + " has " + this.cells.length + " cells, health of " + this.health + ".");
   debug("Finishing the animal that has " + this.neuralCells.length + " neural cells, " + this.opticalCells.length + " optical cells and " + this.motorCells.length + " motor cells.");

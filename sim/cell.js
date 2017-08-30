@@ -202,7 +202,7 @@ Cell.prototype.tick = function() {
 		addProteinIntoTheMix(this.proteins, Proteins.DEVELOP_OPTICAL_CELL, (proteinExpressed - OPTICAL_CELL_START) + 1);
 		debug("Optical cell");
     } else if (proteinExpressed < NO_PROTEIN_START) {
-		addProteinIntoTheMix(this.proteins, Proteins.SPAWN_ANIMAL, 1);
+		//addProteinIntoTheMix(this.proteins, Proteins.SPAWN_ANIMAL, 1);
 		debug("Spawning new animal.");
     }
   } else {
@@ -216,8 +216,8 @@ Cell.prototype.tick = function() {
     debug("I am a neuron cell!");
     this.cellType = CellTypes.NEURON;
   }
-  
-  
+
+
   if (this.hasProtein(Proteins.SPAWN_ANIMAL)) {
     debug("Spawning!");
     debug("First, create a new cell!");
