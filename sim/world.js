@@ -1,7 +1,6 @@
 var debug = require('debug')('world');
 var Animal = require('./animal.js')
 
-var MINIMAL_ANIMAL_NUMBER = 30;
 var runForTicks = 150;
 var HORIZON = 3;
 var DNA_MIN_SIZE = 10;
@@ -12,17 +11,34 @@ var RISK_OF_DANGER = 0.3;
 var NUMBER_OF_PROTEINS = ALL_PROTEINS_LENGTH;
 
 
-function World(socket, io) {
+function World() {
   this.tickNr = 0;
   this.animals = [];
+  this.minimalAnimalNumber = 1;
   this.animalReport = {};
   this.visibleLocations = [];
   this.pointerToView = 0;
   this.visualInput = [];
   this.animalId = 0;
-  this.socket = socket;
-  this.io = io;
   this.result = {};
+
+  // prepare the world
+  // Populate the view with food and danger
+  for (i = 0; i < HORIZON; i++) {
+    oneRow = [];
+    for (j = 0; j < WORLD_WIDTH; j++) {
+      if (Math.random() < CHANCE_OF_FOOD) {
+        oneRow[j] = 1;
+      }
+      else {
+        oneRow[j] = 0;
+      }
+      if (Math.random() < RISK_OF_DANGER) oneRow[j] += 2;
+    }
+    this.visibleLocations[i] = oneRow;
+  }
+  this.visualInput = transformLocationsIntoVisualInput(this.visibleLocations);
+  debug("Visible locations: " + this.visibleLocations);
 }
 
 function transformLocationsIntoVisualInput(locations) {
@@ -86,9 +102,9 @@ World.prototype.tick = function() {
   this.tickNr++;
   debug("Started world tick " + this.tickNr + " with " + this.animals.length + " animals in the world.");
   // Now, catch up to the minimal animal level
-  if (this.animals.length < MINIMAL_ANIMAL_NUMBER) {
-    debug("Will create " + (MINIMAL_ANIMAL_NUMBER - this.animals.length) + " new animals.");
-  this.createRandomAnimals(MINIMAL_ANIMAL_NUMBER - this.animals.length);
+  if (this.animals.length < this.minimalAnimalNumber) {
+    debug("Will create " + (this.minimalAnimalNumber - this.animals.length) + " new animals.");
+  this.createRandomAnimals(this.minimalAnimalNumber - this.animals.length);
   }
 
   //debug("First row: " + this.visibleLocations[this.pointerToView][0] + "," + this.visibleLocations[this.pointerToView][1]);
@@ -131,12 +147,9 @@ World.prototype.tick = function() {
   this.result.animalNr = this.animals.length;
   this.result.visualInput = this.visibleLocations[this.pointerToView];
   this.result.animalReport = this.animalReport;
-  //this.socket.broadcast.emit('result', result);
-  debug(this.result);
-  this.io.emit('result', this.result);
-  this.socket.broadcast.emit('now', '\n');
 }
 
+/*
 World.prototype.start = function(minAnimals, ticks) {
   // Create the world
   // First the animals
@@ -148,22 +161,7 @@ World.prototype.start = function(minAnimals, ticks) {
   // specialDna = [6, 7, 12, 6, 17, 7, 1, 8, 8, 8, 1, 8, 8, 8 ,8 ,8 ,8 ,8 ,8 ,7, 6];
   // this.animals.push(new Animal(specialDna, INITIAL_ANIMAL_NUMBER, this));
 
-  // Populate the view with food and danger
-  for (i = 0; i < HORIZON; i++) {
-    oneRow = [];
-    for (j = 0; j < WORLD_WIDTH; j++) {
-      if (Math.random() < CHANCE_OF_FOOD) {
-        oneRow[j] = 1;
-      }
-      else {
-        oneRow[j] = 0;
-      }
-      if (Math.random() < RISK_OF_DANGER) oneRow[j] += 2;
-    }
-    this.visibleLocations[i] = oneRow;
-  }
-  this.visualInput = transformLocationsIntoVisualInput(this.visibleLocations);
-  debug("Visible locations: " + this.visibleLocations);
+
 
   // Enter the eternal loop
   while(this.tickNr != runForTicks) {
@@ -171,7 +169,7 @@ World.prototype.start = function(minAnimals, ticks) {
 
   }
 }
-
+*/
 
 
 module.exports = World;

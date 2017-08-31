@@ -29,7 +29,7 @@
       <input type="submit" name="b1" value="Step"/>
       <input type="submit" name="b1" value="Reset"/>
     </form>
-    <table style="width:20%">
+    <table id="worldTable" style="width:50%">
       <tr>
         <th>Item</th>
         <th>Value</th>
@@ -42,7 +42,20 @@
         <td>Tick of the world</td>
         <td id="tickNr"></td>
       </tr>
+      <tr>
+        <td>Visual inputs</td>
+        <td id="visual"></td>
+      </tr>
     </table>
+    <table id="animalTable" style="width:50%">
+      <thead>
+        <th>Item</th>
+        <th>Value</th>
+      </thead>
+      <tbody id="animalBody">
+      </tbody>
+    </table>
+
 	<script src="/socket.io/socket.io.js"></script>
 	<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
 	<script>
@@ -51,6 +64,15 @@
     socket.on('result', function(msg){
       $('#animalNr').html(msg.animalNr);
       $('#tickNr').html(msg.tickNr);
+      $('#visual').html(msg.visualInput);
+      $('#animalBody').html("");
+
+      Object.keys(msg.animalReport).forEach(function(key,index) {
+        var animal = msg.animalReport[key];  
+        var html = '<tr><td>Animal ' + animal.id + '</td><td>Health: ' + animal.health +
+        ' Position: ' + animal.position + ' Cells: ' + animal.cellNr + '</td></tr>';
+        $('#animalBody').append(html);
+      });
 		});
 		$('form').submit(function() {
 		  var input = {"number" : $('#a').val(), "rounds" : $('#b').val()};

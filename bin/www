@@ -39,24 +39,22 @@ io.on('connection', function(socket){
   debug("Connecting!");
   io.emit('Result', 'Now we starting...');
   socket.broadcast.emit('Result', 'Now we starting...');
-  var world = new World(socket, io);
+  var world = new World();
   var started = false;
 
   socket.on('Start', function(msg){
     if (!started) {
-    console.log('Number of animals is: ' + msg.number);
-    console.log('Number of rounds is: ' + msg.rounds);
+      console.log('Number of animals is: ' + msg.number);
+      console.log('Number of rounds is: ' + msg.rounds);
+      world.minimalAnimalNumber = msg.number;
 
-
-	  io.emit('Result', 'Now we starting...');
-	  //Start the simulation
-	  debug('Starting the simulation.');
-
-	  world.start(msg.number, msg.rounds);
-    started = true;
-  } else {
-    world.tick();
-  }
+	    io.emit('Result', 'Now we starting...');
+	    //Start the simulation
+	    debug('Starting the simulation.');
+      started = true;
+    }
+    while(msg.rounds-- > 0) world.tick();
+    io.emit('result', world.result);
   });
 });
 

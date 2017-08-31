@@ -172,6 +172,7 @@ Animal.prototype.tick = function() {
     debug("The position is neither 0 or 1 but " + this.position + ". Error!");
   }
 
+  this.report.id = this.id;
   this.report.position = this.position;
   this.report.cellNr = this.cells.length;
   this.report.opticalCellNr = this.opticalCells.length;
