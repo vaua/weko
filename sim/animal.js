@@ -9,6 +9,7 @@ var HEALTH_LOSS_WHEN_DANGER = 7;
 function Animal(dna, id, position, world, initialCell) {
   this.dna = dna;
   this.id = id;
+  this.age = 0;
   this.world = world;
   this.cells = [];
   this.newCells = [];
@@ -19,7 +20,6 @@ function Animal(dna, id, position, world, initialCell) {
   this.opticalCells = [];
   this.motorCells = [];
   this.position = position;
-  this.report = {};
   // Initiate the original cell to the original values
   this.health = 100;
   // Create the initial cell
@@ -40,14 +40,16 @@ function Animal(dna, id, position, world, initialCell) {
   }
 }
 
+
+
 Animal.prototype.tick = function() {
-  // Express genes == grow the body
-  //var tempFluidConcentration = 0;
+  
   var that = this;
   this.newCells = [];
   this.deadCells = [];
+  this.age++;
+  
 
-  var that = this;
   this.cells.forEach(function(cell) {
     //debug("Ticking a cell with id: " + cell.id + ".");
 	if (cell === undefined) debug("The cell is undefined.");
@@ -172,15 +174,17 @@ Animal.prototype.tick = function() {
     debug("The position is neither 0 or 1 but " + this.position + ". Error!");
   }
 
-  this.report.id = this.id;
-  this.report.position = this.position;
-  this.report.cellNr = this.cells.length;
-  this.report.opticalCellNr = this.opticalCells.length;
-  this.report.neuralCellsNr = this.neuralCells.length;
-  this.report.motorCellsNr = this.motorCells.length;
-  this.report.health = this.health;
-
-  this.world.reportAnimal(this);
+  var report = {};
+  report.id = this.id;
+  report.age = this.age;
+  report.position = this.position;
+  report.cellNr = this.cells.length;
+  report.opticalCellNr = this.opticalCells.length;
+  report.neuralCellsNr = this.neuralCells.length;
+  report.motorCellsNr = this.motorCells.length;
+  report.health = this.health;
+  
+  this.world.reportAnimal(report);
 
   debug("Animal " + this.id + " has " + this.cells.length + " cells, health of " + this.health + ".");
   debug("Finishing the animal that has " + this.neuralCells.length + " neural cells, " + this.opticalCells.length + " optical cells and " + this.motorCells.length + " motor cells.");
