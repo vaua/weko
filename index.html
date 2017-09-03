@@ -2,6 +2,8 @@
 <html>
   <head>
     <title>Weko - world, evolution, ko</title>
+    <script type="text/javascript" src="javascripts/vis.js"></script>
+    <link href="stylesheets/vis.css" rel="stylesheet" type="text/css" />
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
       body { font: 13px Helvetica, Arial; }
@@ -17,6 +19,14 @@
       #messages { list-style-type: none; margin: 0; padding: 0; }
       #messages li { padding: 5px 10px; }
       #messages li:nth-child(odd) { background: #eee; }
+      table { border-collapse: collapse; }
+      tr { border-bottom: 1px solid #ccc; }
+      th, td { text-align: left; padding-left: 15px; padding-bottom: 4px}
+      #mynetwork {
+          width: 600px;
+          height: 800px;
+          border: 1px solid lightgray;
+      }
     </style>
   </head>
   <body>
@@ -29,50 +39,72 @@
       <input type="submit" name="b1" value="Step"/>
       <input type="submit" name="b1" value="Reset"/>
     </form>
-    <table id="worldTable" style="width:50%">
-      <tr>
-        <th>Item</th>
-        <th>Value</th>
-      </tr>
-      <tr>
-        <td>Number of animals</td>
-        <td id="animalNr"></td>
-      </tr>
-      <tr>
-        <td>Tick of the world</td>
-        <td id="tickNr"></td>
-      </tr>
-      <tr>
-        <td>Visual inputs</td>
-        <td id="visual"></td>
-      </tr>
-    </table>
-    <table id="animalTable" style="width:50%">
-      <thead>
-        <th>Item</th>
-        <th>Value</th>
-      </thead>
-      <tbody id="animalBody">
-      </tbody>
-    </table>
-
+    <div id="tables">
+      <div id="leftTable" style="float: left; width:50%">
+        <table id="worldTable">
+          <tr>
+            <th>Item</th>
+            <th>Value</th>
+          </tr>
+          <tr>
+            <td>Number of animals</td>
+            <td id="animalNr"></td>
+          </tr>
+          <tr>
+            <td>Tick of the world</td>
+            <td id="tickNr"></td>
+          </tr>
+          <tr>
+            <td>Visual inputs</td>
+            <td id="visual"></td>
+          </tr>
+        </table>
+        <table id="animalTable">
+          <thead>
+            <th>Item</th>
+            <th>Value</th>
+          </thead>
+          <tbody id="animalBody">
+          </tbody>
+        </table>
+      </div>
+      <div id='mynetwork' style="float: left; width:50%"></div>
+    </div>
+  </div>
 	<script src="/socket.io/socket.io.js"></script>
 	<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
 	<script>
 	$(function () {
 		var socket = io();
-    socket.on('result', function(msg){
+    socket.on('result', function(msg) {
       $('#animalNr').html(msg.animalNr);
-      $('#tickNr').html(msg.tickNr);
+      $('#tickNr').html(msg.tickNr + ", total firings: " + msg.totalFirings);
       $('#visual').html(msg.visualInput);
       $('#animalBody').html("");
 
       Object.keys(msg.animalReport).forEach(function(key,index) {
-        var animal = msg.animalReport[key];  
-        var html = '<tr><td>Animal ' + animal.id + '</td><td>Health: ' + animal.health +
-        ' Position: ' + animal.position + ' Cells: ' + animal.cellNr + '</td></tr>';
+        var animal = msg.animalReport[key];
+        var html = '<tr><td>Animal ' + animal.id + '</td><td>Age: ' + animal.age + ' Health: ' + animal.health +
+        ' Moves: ' + animal.moves + ' Position: ' + animal.position + ' Cells: ' + animal.cellNr +
+        ' Optical: ' + animal.opticalCellsActive + '/' + animal.opticalCellNr  +
+        ' Neural: ' + animal.neuralCellsActive + '/' + animal.neuralCellsNr +
+        ' Motor: ' + animal.motorCellsActive + '/' + animal.motorCellsNr + ' Total firings: ' + animal.totalFirings + '</td></tr>';
         $('#animalBody').append(html);
       });
+
+
+      var nodes = new vis.DataSet(msg.animalReport[Object.keys(msg.animalReport)[0]].nodes);
+      var edges = new vis.DataSet(msg.animalReport[Object.keys(msg.animalReport)[0]].edges);
+      var container = document.getElementById('mynetwork');
+      var data = {
+        nodes: nodes,
+        edges: edges
+      };
+      var options = {
+        nodes: {borderWidth: 2},
+        interaction: {hover: true}
+      }
+      var network = new vis.Network(container, data, options);
 		});
 		$('form').submit(function() {
 		  var input = {"number" : $('#a').val(), "rounds" : $('#b').val()};

@@ -21,6 +21,7 @@ function World() {
   this.visualInput = [];
   this.animalId = 0;
   this.result = {};
+  this.totalFirings = 0;
 
   // prepare the world
   // Populate the view with food and danger
@@ -96,6 +97,7 @@ World.prototype.createRandomAnimals = function(numberOfAnimalsToCreate) {
 
 World.prototype.reportAnimal = function(report) {
   this.animalReport[report.id] = report;
+  this.totalFirings += report.totalFirings;
 }
 
 World.prototype.tick = function() {
@@ -148,6 +150,7 @@ World.prototype.tick = function() {
   this.result.animalNr = this.animals.length;
   this.result.visualInput = this.visibleLocations[this.pointerToView];
   this.result.animalReport = this.animalReport;
+  this.result.totalFirings = this.totalFirings;
 }
 
 /*

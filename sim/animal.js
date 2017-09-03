@@ -20,6 +20,8 @@ function Animal(dna, id, position, world, initialCell) {
   this.opticalCells = [];
   this.motorCells = [];
   this.position = position;
+  this.totalNeuralMotorFirings = 0;
+  this.moves = 0;
   // Initiate the original cell to the original values
   this.health = 100;
   // Create the initial cell
@@ -43,12 +45,12 @@ function Animal(dna, id, position, world, initialCell) {
 
 
 Animal.prototype.tick = function() {
-  
+
   var that = this;
   this.newCells = [];
   this.deadCells = [];
   this.age++;
-  
+
 
   this.cells.forEach(function(cell) {
     //debug("Ticking a cell with id: " + cell.id + ".");
@@ -56,9 +58,6 @@ Animal.prototype.tick = function() {
 	else debug("Running cell " + cell.id);
     cell.tick();
   });
-
-  //this.fluidConcentation += that.fluidConcentation / this.cells.length;
-
 
   debug("Removing " + this.deadCells.length + " cells, adding " + this.newCells.length + " cells.");
   this.newCells.forEach(function(cell) {
@@ -99,68 +98,127 @@ Animal.prototype.tick = function() {
   this.cellsWithWillingDendrites = [];
 
   // Now, all cells have ticked. Let's run the neural network.
-  //var allInputGivingCells = this.neuralCells.concat(this.opticalCells);
-  this.neuralCells.forEach(function(cell) {
-    var sumOfInputs = 0;
-    //debug("Checking cell " + cell.id + " for firing. It has " + cell.incomingDendrites.length + " incoming dendrites.");
-    cell.incomingDendrites.forEach(function(dendriteCell) {
-      if (dendriteCell.isActive()) {
-        //debug("Found active input cell!");
-        sumOfInputs += 1;
-      }
-    });
-    //debug("Calculate sum of inputs: " + sumOfInputs);
-    if (sumOfInputs > 0) debug("This cell received " + sumOfInputs + " inputs!");
-    cell.setActive(sumOfInputs);
-  });
+  //WHAT IS THIS?? NEEDED? var allInputGivingCells = this.neuralCells.concat(this.opticalCells);
 
-  // Get and decide optical inputs
+
+  // Get inputs from the world and set optical cells.
   // Position: 0: food left, 1: danger left, 2: food right, 3: danger right.
   // Inputs get these values in order.
+  var nodes = [];
+  var edges = [];
   var visualInput = this.world.getVisualInput();
   debug("Obtained visual input: " + visualInput);
 
   var i = 0;
   this.opticalCells.forEach(function(cell) {
+    // Add cell to the nodes
+    var cell_description = {};
+    cell_description.id = cell.id;
+    cell_description.label = cell.id;
+    cell_description.color = "yellow";
+    nodes.push(cell_description);
+    // There are four options in the world - every forth optical cell react to specific thing.
     var rest = i%4;
     if (rest == 0) if (visualInput[0]%2 == 1) cell.setActive(199);  // Food left in field - this cell should be active.
     if (rest == 1) if (visualInput[0] > 1) cell.setActive(199);  // Danger left in field - thiss cell
-    if (rest == 2) if (visualInput[1]%2 == 1) cell.setActive(199);  // Food left in field - this cell should be active.
-    if (rest == 3) if (visualInput[1] > 1) cell.setActive(199);  // Danger left in field - thiss cell
+    if (rest == 2) if (visualInput[1]%2 == 1) cell.setActive(199);  // Food right in field - this cell should be active.
+    if (rest == 3) if (visualInput[1] > 1) cell.setActive(199);  // Danger right in field - thiss cell
     i+=1;
   });
 
-  var activeCells = 0;
-  this.opticalCells.forEach(function(cell) {
-    if (cell.isActive()) activeCells += 1;
-  });
-  if (activeCells > 0 ) debug(activeCells + " of " + this.opticalCells.length + " optical cells are active!---------------------------------------");
-
-  activeCells = 0;
+  // Now that optical cells have been set, calculate the pure neural cells.
   this.neuralCells.forEach(function(cell) {
-    if (cell.isActive()) activeCells += 1;
+    // Add cell to the nodes
+    var cell_description = {};
+    cell_description.id = cell.id;
+    cell_description.label = cell.id;
+    cell_description.color = "blue";
+    nodes.push(cell_description);
+
+    var sumOfInputs = 0;
+    //console.log("Checking cell " + cell.id + " for firing. It has " + cell.incomingDendrites.length + " incoming dendrites.");
+    cell.incomingDendrites.forEach(function(dendriteCell) {
+      // Add the edges to the reporting entity.
+      var edge = {};
+      edge.from = dendriteCell.id;
+      edge.to = cell.id;
+      console.log("Edge: " + edge);
+      edges.push(edge);
+
+      if (dendriteCell.isActive()) {
+        //debug("Found active input cell!");
+        sumOfInputs += 1;
+      }
+      if ((dendriteCell.cellType == CellTypes.OPTICAL) && dendriteCell.isActive()) {console.log("Has connection with optic cell which is active.")};
+      //if (dendriteCell.isActive()) console.log("And it's firing!");
+    });
+    //debug("Calculate sum of inputs: " + sumOfInputs);
+    if (sumOfInputs > 0) console.log("This cell received " + sumOfInputs + " inputs!");
+    cell.setActive(sumOfInputs);
   });
-  if (activeCells > 0 ) debug(activeCells + " of " + this.neuralCells.length + " neural cells are active!========================================");
 
-  activeCells = 0;
-  this.motorCells.forEach(function(cell) {
-    if (cell.isActive()) activeCells += 1;
-  });
-
-  if (activeCells > 0 ) debug(activeCells + " of " + this.motorCells.length + " motor cells are active!");
-
-  // Move the animal
+  // Now calculate the motor cells and move the animal
   var direction = 0;
   i=0;
+  sumOfInputs = 0;
   this.motorCells.forEach(function(cell){
+    // Add cell to the nodes
+    var cell_description = {};
+    cell_description.id = cell.id;
+    cell_description.label = cell.id;
+    cell_description.color = "green";
+    nodes.push(cell_description);
+
+    // Check incoming connections
+    cell.incomingDendrites.forEach(function(dendriteCell) {
+      // Add the edges to the reporting entity.
+      var edge = {};
+      edge.from = dendriteCell.id;
+      edge.to = cell.id;
+      edges.push(edge);
+
+      if (dendriteCell.isActive()) {
+        //debug("Found active input cell!");
+        sumOfInputs += 1;
+      }
+    });
+
+    if (sumOfInputs > 0) console.log("This MOTOR cell received " + sumOfInputs + " inputs!");
+    cell.setActive(sumOfInputs);
 	  if (cell.isActive()) if (i%2 == 0) direction +=1; else direction-=1;
   });
+
+
   if (direction != 0) {
-	debug("Motor cells active! We're moving towards: " + direction);
-	this.position += direction;
-	if (this.position < 0) this.position = 0;
-	if (this.position > 1) this.position = 1;
+	   debug("Motor cells active! We're moving towards: " + direction);
+	   this.position += direction;
+     this.moves++;
+	   if (this.position < 0) this.position = 0;
+	   if (this.position > 1) this.position = 1;
   }
+
+
+  // Tabulate and report the neural cell handlings...
+  var activeOpticalCells = 0;
+  this.opticalCells.forEach(function(cell) {
+    if (cell.isActive()) activeOpticalCells += 1;
+  });
+
+  var activeNeuralCells = 0;
+  this.neuralCells.forEach(function(cell) {
+    if (cell.isActive()) {
+      console.log("Found active neural cell! # is " + activeNeuralCells);
+      activeNeuralCells += 1;
+    }
+  });
+  this.totalNeuralMotorFirings += activeNeuralCells;
+
+  var activeMotorCells = 0;
+  this.motorCells.forEach(function(cell) {
+    if (cell.isActive()) activeMotorCells += 1;
+  });
+  this.totalNeuralMotorFirings += activeMotorCells;
+
 
   // Apply the food / danger
   if (this.position == 0) {
@@ -182,8 +240,17 @@ Animal.prototype.tick = function() {
   report.opticalCellNr = this.opticalCells.length;
   report.neuralCellsNr = this.neuralCells.length;
   report.motorCellsNr = this.motorCells.length;
+  //console.log(activeOpticalCells + ", " + activeNeuralCells + ", " + activeMotorCells);
+  report.opticalCellsActive = activeOpticalCells;
+  report.neuralCellsActive = activeNeuralCells;
+  report.motorCellsActive = activeMotorCells;
   report.health = this.health;
-  
+  report.moves = this.moves;
+  report.totalFirings = this.totalNeuralMotorFirings;
+  report.nodes = nodes;
+  report.edges = edges;
+  console.log(report.edges);
+
   this.world.reportAnimal(report);
 
   debug("Animal " + this.id + " has " + this.cells.length + " cells, health of " + this.health + ".");

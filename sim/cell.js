@@ -125,7 +125,7 @@ Cell.prototype.isActive = function() {
 Cell.prototype.setActive = function(activeInputs) {
   if (activeInputs > NEURON_FIRING_THRESHOLD) {
     this.active = true;
-    debug("Cell is firing.");
+    if (activeInputs != 199) console.log("Cell is firing.");
   }
   else {
     this.active = false;
