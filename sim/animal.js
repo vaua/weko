@@ -142,7 +142,6 @@ Animal.prototype.tick = function() {
       var edge = {};
       edge.from = dendriteCell.id;
       edge.to = cell.id;
-      console.log("Edge: " + edge);
       edges.push(edge);
 
       if (dendriteCell.isActive()) {
@@ -249,7 +248,6 @@ Animal.prototype.tick = function() {
   report.totalFirings = this.totalNeuralMotorFirings;
   report.nodes = nodes;
   report.edges = edges;
-  console.log(report.edges);
 
   this.world.reportAnimal(report);
 

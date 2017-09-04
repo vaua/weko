@@ -76,6 +76,7 @@
 	<script>
 	$(function () {
 		var socket = io();
+
     socket.on('result', function(msg) {
       $('#animalNr').html(msg.animalNr);
       $('#tickNr').html(msg.tickNr + ", total firings: " + msg.totalFirings);
@@ -92,19 +93,13 @@
         $('#animalBody').append(html);
       });
 
+      var graphAnimalId = Object.keys(msg.animalReport)[0];
+      graphNetwork(msg.animalReport[graphAnimalId].nodes, msg.animalReport[graphAnimalId].edges);
 
-      var nodes = new vis.DataSet(msg.animalReport[Object.keys(msg.animalReport)[0]].nodes);
-      var edges = new vis.DataSet(msg.animalReport[Object.keys(msg.animalReport)[0]].edges);
-      var container = document.getElementById('mynetwork');
-      var data = {
-        nodes: nodes,
-        edges: edges
-      };
-      var options = {
-        nodes: {borderWidth: 2},
-        interaction: {hover: true}
-      }
-      var network = new vis.Network(container, data, options);
+      $('#animalTable td').on('click', function() {
+        var graphAnimalId = $(this).text().substring(7);
+        graphNetwork(msg.animalReport[graphAnimalId].nodes, msg.animalReport[graphAnimalId].edges);
+      });
 		});
 		$('form').submit(function() {
 		  var input = {"number" : $('#a').val(), "rounds" : $('#b').val()};
@@ -112,6 +107,21 @@
 		  return false;
 		});
 	});
+
+  function graphNetwork(nodes, edges) {
+    var nodes = new vis.DataSet(nodes);
+    var edges = new vis.DataSet(edges);
+    var container = document.getElementById('mynetwork');
+    var data = {
+      nodes: nodes,
+      edges: edges
+    };
+    var options = {
+      nodes: {borderWidth: 2},
+      interaction: {hover: true}
+    }
+    var network = new vis.Network(container, data, options);
+  }
 	</script>
   </body>
 </html>
