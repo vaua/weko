@@ -126,6 +126,9 @@ Animal.prototype.tick = function() {
     i+=1;
   });
 
+  var totalInputs = 0;
+  var totalDendrites = 0;
+
   // Now that optical cells have been set, calculate the pure neural cells.
   this.neuralCells.forEach(function(cell) {
     // Add cell to the nodes
@@ -136,7 +139,6 @@ Animal.prototype.tick = function() {
     nodes.push(cell_description);
 
     var sumOfInputs = 0;
-    //console.log("Checking cell " + cell.id + " for firing. It has " + cell.incomingDendrites.length + " incoming dendrites.");
     cell.incomingDendrites.forEach(function(dendriteCell) {
       // Add the edges to the reporting entity.
       var edge = {};
@@ -144,15 +146,18 @@ Animal.prototype.tick = function() {
       edge.to = cell.id;
       edges.push(edge);
 
-      if (dendriteCell.isActive()) {
+      totalDendrites += 1;
+	  if (dendriteCell.isActive()) {
         //debug("Found active input cell!");
         sumOfInputs += 1;
       }
+	  
       if ((dendriteCell.cellType == CellTypes.OPTICAL) && dendriteCell.isActive()) {console.log("Has connection with optic cell which is active.")};
       //if (dendriteCell.isActive()) console.log("And it's firing!");
     });
     //debug("Calculate sum of inputs: " + sumOfInputs);
-    if (sumOfInputs > 0) console.log("This cell received " + sumOfInputs + " inputs!");
+    //if (sumOfInputs > 0) console.log("This cell received " + sumOfInputs + " inputs!");
+	totalInputs += sumOfInputs;
     cell.setActive(sumOfInputs);
   });
 
@@ -176,13 +181,15 @@ Animal.prototype.tick = function() {
       edge.to = cell.id;
       edges.push(edge);
 
+	  totalDendrites += 1;
       if (dendriteCell.isActive()) {
         //debug("Found active input cell!");
         sumOfInputs += 1;
       }
     });
 
-    if (sumOfInputs > 0) console.log("This MOTOR cell received " + sumOfInputs + " inputs!");
+    //if (sumOfInputs > 0) console.log("This MOTOR cell received " + sumOfInputs + " inputs!");
+	totalInputs += sumOfInputs;
     cell.setActive(sumOfInputs);
 	  if (cell.isActive()) if (i%2 == 0) direction +=1; else direction-=1;
   });
@@ -248,6 +255,8 @@ Animal.prototype.tick = function() {
   report.totalFirings = this.totalNeuralMotorFirings;
   report.nodes = nodes;
   report.edges = edges;
+  report.totalInputs = totalInputs;
+  report.totalDendrites = totalDendrites;
 
   this.world.reportAnimal(report);
 

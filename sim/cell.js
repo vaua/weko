@@ -80,7 +80,7 @@ function Cell(id, parent, dna, proteins, cellType) {
   this.positionInDna = 0;
   this.cellType = cellType;
   this.active = false;
-  this.incomingDendrites = [];
+  this.incomingDendrites = new Set();
   debug("New cell is born with name: " + this.id + " and cell type " + this.cellType);
 
   // Handle neural cells
@@ -115,7 +115,10 @@ Cell.prototype.hasProtein = function(protein) {
 }
 
 Cell.prototype.addIncomingDendrites = function(dendrites) {
-  this.incomingDendrites.push(...dendrites);
+  var that = this;
+  dendrites.forEach(function (dendrite) {
+	that.incomingDendrites.add(dendrite);
+  });
 }
 
 Cell.prototype.isActive = function() {
@@ -125,7 +128,7 @@ Cell.prototype.isActive = function() {
 Cell.prototype.setActive = function(activeInputs) {
   if (activeInputs > NEURON_FIRING_THRESHOLD) {
     this.active = true;
-    if (activeInputs != 199) console.log("Cell is firing.");
+    //if (activeInputs != 199) console.log("Cell is firing.");
   }
   else {
     this.active = false;
