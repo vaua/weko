@@ -117,7 +117,7 @@ Cell.prototype.hasProtein = function(protein) {
 Cell.prototype.addIncomingDendrites = function(dendrites) {
   var that = this;
   dendrites.forEach(function (dendrite) {
-	that.incomingDendrites.add(dendrite);
+	   that.incomingDendrites.add(dendrite);
   });
 }
 

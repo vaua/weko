@@ -14,8 +14,8 @@ function Animal(dna, id, position, world, initialCell) {
   this.cells = [];
   this.newCells = [];
   this.deadCells = [];
-  this.cellsWithWillingDendrites = [];
-  this.cellsAcceptingDendrites = [];
+  this.cellsWithWillingDendrites = new Set();
+  this.cellsAcceptingDendrites = new Set();
   this.neuralCells = [];
   this.opticalCells = [];
   this.motorCells = [];
@@ -54,8 +54,8 @@ Animal.prototype.tick = function() {
 
   this.cells.forEach(function(cell) {
     //debug("Ticking a cell with id: " + cell.id + ".");
-	if (cell === undefined) debug("The cell is undefined.");
-	else debug("Running cell " + cell.id);
+	  if (cell === undefined) debug("The cell is undefined.");
+	  else debug("Running cell " + cell.id);
     cell.tick();
   });
 
@@ -94,8 +94,8 @@ Animal.prototype.tick = function() {
     //debug("Added " + that.cellsWithWillingDendrites.length + " to cell with id " + cell.id);
   });
   // Now wipe these two lists as we have added all needed connections
-  this.cellsAcceptingDendrites = [];
-  this.cellsWithWillingDendrites = [];
+  this.cellsAcceptingDendrites.clear();
+  this.cellsWithWillingDendrites.clear();
 
   // Now, all cells have ticked. Let's run the neural network.
   //WHAT IS THIS?? NEEDED? var allInputGivingCells = this.neuralCells.concat(this.opticalCells);
@@ -144,20 +144,19 @@ Animal.prototype.tick = function() {
       var edge = {};
       edge.from = dendriteCell.id;
       edge.to = cell.id;
+      edge.arrows = "to";
+      edge.color = "black";
       edges.push(edge);
 
       totalDendrites += 1;
-	  if (dendriteCell.isActive()) {
-        //debug("Found active input cell!");
-        sumOfInputs += 1;
-      }
-	  
-      if ((dendriteCell.cellType == CellTypes.OPTICAL) && dendriteCell.isActive()) {console.log("Has connection with optic cell which is active.")};
-      //if (dendriteCell.isActive()) console.log("And it's firing!");
+	    if (dendriteCell.isActive()) sumOfInputs += 1;
+
+      if ((dendriteCell.cellType == CellTypes.OPTICAL) && dendriteCell.isActive()) debug("Has connection with optic cell which is active.");
     });
     //debug("Calculate sum of inputs: " + sumOfInputs);
     //if (sumOfInputs > 0) console.log("This cell received " + sumOfInputs + " inputs!");
-	totalInputs += sumOfInputs;
+	  totalInputs += sumOfInputs;
+    console.log("Increased total inputs by " + sumOfInputs);
     cell.setActive(sumOfInputs);
   });
 
@@ -179,9 +178,11 @@ Animal.prototype.tick = function() {
       var edge = {};
       edge.from = dendriteCell.id;
       edge.to = cell.id;
+      edge.arrows = "to";
+      edge.color = "red";
       edges.push(edge);
 
-	  totalDendrites += 1;
+	    totalDendrites += 1;
       if (dendriteCell.isActive()) {
         //debug("Found active input cell!");
         sumOfInputs += 1;
@@ -189,7 +190,8 @@ Animal.prototype.tick = function() {
     });
 
     //if (sumOfInputs > 0) console.log("This MOTOR cell received " + sumOfInputs + " inputs!");
-	totalInputs += sumOfInputs;
+	  totalInputs += sumOfInputs;
+    console.log("Increased total inputs by " + sumOfInputs + " to " + totalInputs);
     cell.setActive(sumOfInputs);
 	  if (cell.isActive()) if (i%2 == 0) direction +=1; else direction-=1;
   });
@@ -293,11 +295,11 @@ Animal.prototype.addOpticalCell = function(cell) {
 }
 
 Animal.prototype.addCellWithWillingDendrites = function(cell) {
-  this.cellsWithWillingDendrites.push(cell);
+  this.cellsWithWillingDendrites.add(cell);
 }
 
 Animal.prototype.addCellAcceptingDendrites = function(cell) {
-  this.cellsAcceptingDendrites.push(cell);
+  this.cellsAcceptingDendrites.add(cell);
 }
 
 module.exports = Animal;
