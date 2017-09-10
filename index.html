@@ -27,6 +27,11 @@
           height: 800px;
           border: 1px solid lightgray;
       }
+      .highlight { background-color: red; }
+      .mover { background-color: #E6E6FA; }
+      .connected { background-color: #90EE90; }
+      .firing { background-color: #20B2AA; }
+
     </style>
   </head>
   <body>
@@ -74,30 +79,57 @@
 	<script src="/socket.io/socket.io.js"></script>
 	<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
 	<script>
+
+  var graphAnimalId;
 	$(function () {
 		var socket = io();
 
-    socket.on('result', function(msg) {
+      socket.on('result', function(msg) {
       $('#animalNr').html(msg.animalNr);
       $('#tickNr').html(msg.tickNr + ", total firings: " + msg.totalFirings);
       $('#visual').html(msg.visualInput);
       $('#animalBody').html("");
 
+
+
+
       Object.keys(msg.animalReport).forEach(function(key,index) {
         var animal = msg.animalReport[key];
-        var html = '<tr><td>Animal ' + animal.id + '</td><td>Age: ' + animal.age + ' Health: ' + animal.health +
+        var html = '<tr id="Animal' + key + '"><td>Animal ' + animal.id + '</td><td>Age: ' + animal.age + ' Health: ' + animal.health +
         ' Moves: ' + animal.moves + ' Position: ' + animal.position + ' Cells: ' + animal.cellNr +
         ' Optical: ' + animal.opticalCellsActive + '/' + animal.opticalCellNr  +
         ' Neural: ' + animal.neuralCellsActive + '/' + animal.neuralCellsNr +
         ' Motor: ' + animal.motorCellsActive + '/' + animal.motorCellsNr + ' Total firings: ' + animal.totalFirings + ' Dendrites: ' + animal.totalInputs + '/' + animal.totalDendrites + '</td></tr>';
         $('#animalBody').append(html);
+
+        // Now, color the rows.
+        if (animal.totalDendrites > 0) $("#Animal" + key).addClass("connected");
+        if (animal.totalInputs > 0) $("#Animal" + key).addClass("firing");
+        if (animal.moves > 0) $("#Animal" + key).addClass("mover");
       });
 
-      var graphAnimalId = Object.keys(msg.animalReport)[0];
+
+      // Decide which line should be highlighted as chosen animal
+      if (graphAnimalId === undefined) {
+        graphAnimalId = Object.keys(msg.animalReport)[0];
+        $("#animalTable tr").removeClass("highlight");
+        $("#Animal" + graphAnimalId).addClass("highlight");
+      } else if (jQuery.inArray(graphAnimalId, Object.keys(msg.animalReport)) < 0) {
+          console.log("Animal " + graphAnimalId + " is not present any more!");
+          graphAnimalId = Object.keys(msg.animalReport)[0];
+          $("#animalTable tr").removeClass("highlight");
+          $("#Animal" + graphAnimalId).addClass("highlight");
+      } else {  // now we know that graphAnimalId is not undefined or non existant, highlight it!
+        $("#Animal" + graphAnimalId).addClass("highlight");
+      }
+
+      console.log("Graphing animal " + graphAnimalId);
       graphNetwork(msg.animalReport[graphAnimalId].nodes, msg.animalReport[graphAnimalId].edges);
 
-      $('#animalTable td').on('click', function() {
-        var graphAnimalId = $(this).text().substring(7);
+      $('#animalTable tr').on('click', function() {
+        graphAnimalId = $(this).find("td:first").text().substring(7);
+        $("#animalTable tr").removeClass("highlight");
+        $("#Animal" + graphAnimalId).addClass("highlight");
         graphNetwork(msg.animalReport[graphAnimalId].nodes, msg.animalReport[graphAnimalId].edges);
       });
 		});

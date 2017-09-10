@@ -77,6 +77,23 @@ Animal.prototype.tick = function() {
   // Check if this animal should die
   if (this.cells.length <= 0 || this.health <= 0) {
     debug("This animal is dead! Put it into removal bin.");
+
+    // But before, calculate fitness point and see if it was good!
+    var fitness = ((this.moves > 0) * 100) +
+                  ((this.totalFirings > 0) * 50) +
+                  ((this.totalDendrites > 0) * 15) +
+                  ((this.age > 80) * (this.age - 80));
+    console.log("This dying animal got fitness of " + fitness);
+    if (fitness > 0) {
+      if ((this.world.dnaHallOfFame.dna === undefined) || (fitness > this.world.dnaHallOfFame.fitness)) {
+        this.world.dnaHallOfFame.dna = this.dna;
+        this.world.dnaHallOfFame.fitness = fitness;
+        this.world.dnaHallOfFame.age = this.age;
+        this.world.dnaHallOfFame.id = this.id;
+        console.log("Switching dna leader to this awesome animal.");
+      }
+    }
+
     var index = this.world.animals.indexOf(this);
     if (index > -1) {
       debug("Found the animal and splicing it.");
@@ -156,14 +173,12 @@ Animal.prototype.tick = function() {
     //debug("Calculate sum of inputs: " + sumOfInputs);
     //if (sumOfInputs > 0) console.log("This cell received " + sumOfInputs + " inputs!");
 	  totalInputs += sumOfInputs;
-    console.log("Increased total inputs by " + sumOfInputs);
     cell.setActive(sumOfInputs);
   });
 
   // Now calculate the motor cells and move the animal
   var direction = 0;
   i=0;
-  sumOfInputs = 0;
   this.motorCells.forEach(function(cell){
     // Add cell to the nodes
     var cell_description = {};
@@ -173,6 +188,7 @@ Animal.prototype.tick = function() {
     nodes.push(cell_description);
 
     // Check incoming connections
+    var sumOfInputs = 0; // sum of input to one cell from all its dendrites. Set to 0 before summing inputs.
     cell.incomingDendrites.forEach(function(dendriteCell) {
       // Add the edges to the reporting entity.
       var edge = {};
@@ -191,7 +207,6 @@ Animal.prototype.tick = function() {
 
     //if (sumOfInputs > 0) console.log("This MOTOR cell received " + sumOfInputs + " inputs!");
 	  totalInputs += sumOfInputs;
-    console.log("Increased total inputs by " + sumOfInputs + " to " + totalInputs);
     cell.setActive(sumOfInputs);
 	  if (cell.isActive()) if (i%2 == 0) direction +=1; else direction-=1;
   });

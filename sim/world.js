@@ -22,6 +22,15 @@ function World() {
   this.animalId = 0;
   this.result = {};
   this.totalFirings = 0;
+  this.dnaHallOfFame = {}; // Currenly object, animal id, age, acquiered points and DNA
+
+  //Comment - how to do DNA for new animals
+  // Point system, upon death.
+  // 1. Moving, to food / away from danger. If  >50% of moves are towards food, away from danger, than this is awarded.
+  // 2. Moving at all.
+  // 3. Firing Neurons.
+  // 4. Age at death - if more than 70.
+
 
   // prepare the world
   // Populate the view with food and danger
@@ -83,13 +92,22 @@ World.prototype.createAnimal = function(initialCell, position) {
 	this.animals.push(new Animal(initialCell.dna, this.animalId++, position, this, initialCell));
 }
 
-World.prototype.createRandomAnimals = function(numberOfAnimalsToCreate) {
+World.prototype.createAnimals = function(numberOfAnimalsToCreate) {
   for (i = 0; i < numberOfAnimalsToCreate; i++) {
     var dna = [];
-    var dnaSize = Math.floor((Math.random() * DNA_MAX_SIZE) + DNA_MIN_SIZE);
-    for (j = 0; j < dnaSize; j++) {
-      dna.push(Math.floor((Math.random() * NUMBER_OF_PROTEINS) + 1));
+    var type = Math.random();
+
+    if ((this.dnaHallOfFame.dna === undefined) || (type < 0.5)) { // do random animal
+      var dnaSize = Math.floor((Math.random() * DNA_MAX_SIZE) + DNA_MIN_SIZE);
+      for (j = 0; j < dnaSize; j++) {
+        dna.push(Math.floor((Math.random() * NUMBER_OF_PROTEINS) + 1));
+      }
+      console.log("Created random animal.");
+    } else {
+      dna = this.dnaHallOfFame.dna;
+      console.log("Created copied animal, " + (this.animalId + 1) + " is clone of " + this.dnaHallOfFame.id);
     }
+
     var place = Math.floor(Math.random() * WORLD_WIDTH);
     this.animals.push(new Animal(dna, this.animalId++, place, this));
   }
@@ -107,7 +125,7 @@ World.prototype.tick = function() {
   // Now, catch up to the minimal animal level
   if (this.animals.length < this.minimalAnimalNumber) {
     debug("Will create " + (this.minimalAnimalNumber - this.animals.length) + " new animals.");
-  this.createRandomAnimals(this.minimalAnimalNumber - this.animals.length);
+  this.createAnimals(this.minimalAnimalNumber - this.animals.length);
   }
 
   //debug("First row: " + this.visibleLocations[this.pointerToView][0] + "," + this.visibleLocations[this.pointerToView][1]);
