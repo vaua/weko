@@ -6,7 +6,7 @@ var HEALTH_GAIN_WHEN_FOOD = 5;
 var HEALTH_LOSS_WHEN_DANGER = 7;
 
 
-function Animal(dna, id, position, world, initialCell) {
+function Animal(dna, id, position, world, initialCell, ancestor) {
   this.dna = dna;
   this.id = id;
   this.age = 0;
@@ -22,6 +22,8 @@ function Animal(dna, id, position, world, initialCell) {
   this.position = position;
   this.totalNeuralMotorFirings = 0;
   this.moves = 0;
+  this.successfulMoves = 0;
+  this.ancestor = ancestor;
   // Initiate the original cell to the original values
   this.health = 100;
   // Create the initial cell
@@ -54,7 +56,7 @@ Animal.prototype.tick = function() {
 
   this.cells.forEach(function(cell) {
     //debug("Ticking a cell with id: " + cell.id + ".");
-	  if (cell === undefined) debug("The cell is undefined.");
+	  if (cell === undefined) console.log("The cell is undefined.");
 	  else debug("Running cell " + cell.id);
     cell.tick();
   });
@@ -79,18 +81,17 @@ Animal.prototype.tick = function() {
     debug("This animal is dead! Put it into removal bin.");
 
     // But before, calculate fitness point and see if it was good!
-    var fitness = ((this.moves > 0) * 100) +
-                  ((this.totalFirings > 0) * 50) +
-                  ((this.totalDendrites > 0) * 15) +
+    var fitness = (this.successfulMoves * 20) +
+                  ((this.moves > 0) * 100) +
+                  ((this.totalNeuralMotorFirings > 0) * this.totalNeuralMotorFirings) +
                   ((this.age > 80) * (this.age - 80));
-    console.log("This dying animal got fitness of " + fitness);
     if (fitness > 0) {
       if ((this.world.dnaHallOfFame.dna === undefined) || (fitness > this.world.dnaHallOfFame.fitness)) {
         this.world.dnaHallOfFame.dna = this.dna;
         this.world.dnaHallOfFame.fitness = fitness;
         this.world.dnaHallOfFame.age = this.age;
         this.world.dnaHallOfFame.id = this.id;
-        console.log("Switching dna leader to this awesome animal.");
+        debug("Switching dna leader to this awesome animal.");
       }
     }
 
@@ -214,10 +215,23 @@ Animal.prototype.tick = function() {
 
   if (direction != 0) {
 	   debug("Motor cells active! We're moving towards: " + direction);
-	   this.position += direction;
+     var oldPosition = this.position;
+     this.position += direction;
      this.moves++;
+
+     // Now that we are moving, check if the move is successful. Are we moving away from danger? Or to food?
+
+
 	   if (this.position < 0) this.position = 0;
 	   if (this.position > 1) this.position = 1;
+
+     if (this.position != oldPosition) { // We have actually moved...
+       debug("Moved, direction is " + direction + " and visual " + visualInput);
+       if ((visualInput[0]%2 == 1) && direction < 0) this.successfulMoves++;   // Food left in field - this cell should be active.
+       if ((visualInput[0] > 1) && direction > 0) this.successfulMoves++;  // Danger left in field - thiss cell
+       if ((visualInput[1]%2 == 1) && direction > 0) this.successfulMoves++;  // Food right in field - this cell should be active.
+       if ((visualInput[1] > 1) && direction < 0) this.successfulMoves++;  // Danger right in field - thiss cell
+     }
   }
 
 
@@ -229,10 +243,7 @@ Animal.prototype.tick = function() {
 
   var activeNeuralCells = 0;
   this.neuralCells.forEach(function(cell) {
-    if (cell.isActive()) {
-      console.log("Found active neural cell! # is " + activeNeuralCells);
-      activeNeuralCells += 1;
-    }
+    if (cell.isActive()) activeNeuralCells += 1;
   });
   this.totalNeuralMotorFirings += activeNeuralCells;
 
@@ -269,11 +280,13 @@ Animal.prototype.tick = function() {
   report.motorCellsActive = activeMotorCells;
   report.health = this.health;
   report.moves = this.moves;
+  report.successfulMoves = this.successfulMoves;
   report.totalFirings = this.totalNeuralMotorFirings;
   report.nodes = nodes;
   report.edges = edges;
   report.totalInputs = totalInputs;
   report.totalDendrites = totalDendrites;
+  report.ancestor = this.ancestor;
 
   this.world.reportAnimal(report);
 

@@ -96,20 +96,21 @@ World.prototype.createAnimals = function(numberOfAnimalsToCreate) {
   for (i = 0; i < numberOfAnimalsToCreate; i++) {
     var dna = [];
     var type = Math.random();
+    var ancestor;
 
     if ((this.dnaHallOfFame.dna === undefined) || (type < 0.5)) { // do random animal
       var dnaSize = Math.floor((Math.random() * DNA_MAX_SIZE) + DNA_MIN_SIZE);
       for (j = 0; j < dnaSize; j++) {
         dna.push(Math.floor((Math.random() * NUMBER_OF_PROTEINS) + 1));
       }
-      console.log("Created random animal.");
     } else {
       dna = this.dnaHallOfFame.dna;
-      console.log("Created copied animal, " + (this.animalId + 1) + " is clone of " + this.dnaHallOfFame.id);
+      ancestor = this.dnaHallOfFame.id;
+      debug("Created copied animal, " + (this.animalId + 1) + " is clone of " + this.dnaHallOfFame.id);
     }
 
     var place = Math.floor(Math.random() * WORLD_WIDTH);
-    this.animals.push(new Animal(dna, this.animalId++, place, this));
+    this.animals.push(new Animal(dna, this.animalId++, place, this, undefined, ancestor));
   }
 }
 
@@ -138,6 +139,7 @@ World.prototype.tick = function() {
 
   // Run all creatures and things in the universe
   this.animals.forEach(function(animal) {
+    if (animal === undefined) console.log("Found an unind");
     animal.tick();
   });
 

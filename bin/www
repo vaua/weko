@@ -43,6 +43,8 @@ io.on('connection', function(socket){
   var started = false;
 
   socket.on('Start', function(msg){
+    var start = process.hrtime();
+    var rounds = msg.rounds;
     if (!started) {
       console.log('Number of animals is: ' + msg.number);
       console.log('Number of rounds is: ' + msg.rounds);
@@ -54,6 +56,11 @@ io.on('connection', function(socket){
       started = true;
     }
     while(msg.rounds-- > 0) world.tick();
+    var end = process.hrtime(start);
+    var elapsed = (end[0] * 1000) + (end[1] / 1000000);
+    world.result.lastTickTime = elapsed;
+    world.result.lastTickTimePerTick = elapsed / rounds;
+    world.result.lastTickTimePerTickPerAnimal = world.result.lastTickTimePerTick / msg.number;
     io.emit('result', world.result);
   });
   socket.on('disconnect', function(){

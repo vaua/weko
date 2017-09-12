@@ -86,7 +86,7 @@
 
       socket.on('result', function(msg) {
       $('#animalNr').html(msg.animalNr);
-      $('#tickNr').html(msg.tickNr + ", total firings: " + msg.totalFirings);
+      $('#tickNr').html(msg.tickNr + ", total firings: " + msg.totalFirings + ". Last round took " + (msg.lastTickTime / 1000).toFixed(4) + "[s], per tick: " + msg.lastTickTimePerTick.toFixed(4) + "[ms], per animal " + msg.lastTickTimePerTickPerAnimal.toFixed(4) + "[ms].");
       $('#visual').html(msg.visualInput);
       $('#animalBody').html("");
 
@@ -96,10 +96,10 @@
       Object.keys(msg.animalReport).forEach(function(key,index) {
         var animal = msg.animalReport[key];
         var html = '<tr id="Animal' + key + '"><td>Animal ' + animal.id + '</td><td>Age: ' + animal.age + ' Health: ' + animal.health +
-        ' Moves: ' + animal.moves + ' Position: ' + animal.position + ' Cells: ' + animal.cellNr +
+        ' Moves: ' + animal.successfulMoves + '/' + animal.moves + ' Position: ' + animal.position + ' Cells: ' + animal.cellNr +
         ' Optical: ' + animal.opticalCellsActive + '/' + animal.opticalCellNr  +
         ' Neural: ' + animal.neuralCellsActive + '/' + animal.neuralCellsNr +
-        ' Motor: ' + animal.motorCellsActive + '/' + animal.motorCellsNr + ' Total firings: ' + animal.totalFirings + ' Dendrites: ' + animal.totalInputs + '/' + animal.totalDendrites + '</td></tr>';
+        ' Motor: ' + animal.motorCellsActive + '/' + animal.motorCellsNr + ' Total firings: ' + animal.totalFirings + ' Dendrites: ' + animal.totalInputs + '/' + animal.totalDendrites + ' ancestor: ' + animal.ancestor + '</td></tr>';
         $('#animalBody').append(html);
 
         // Now, color the rows.
