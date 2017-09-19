@@ -22,6 +22,8 @@ function World() {
   this.animalId = 0;
   this.result = {};
   this.totalFirings = 0;
+  this.left = 0;
+  this.right = 0;
   this.dnaHallOfFame = {}; // Currenly object, animal id, age, acquiered points and DNA
 
   //Comment - how to do DNA for new animals
@@ -171,6 +173,8 @@ World.prototype.tick = function() {
   this.result.visualInput = this.visibleLocations[this.pointerToView];
   this.result.animalReport = this.animalReport;
   this.result.totalFirings = this.totalFirings;
+  this.result.left = this.left;
+  this.result.right = this.right;
 }
 
 /*

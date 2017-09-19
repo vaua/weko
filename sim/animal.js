@@ -22,6 +22,9 @@ function Animal(dna, id, position, world, initialCell, ancestor) {
   this.position = position;
   this.totalNeuralMotorFirings = 0;
   this.moves = 0;
+  this.left = 0;
+  this.right = 0;
+  this.realMoves = 0;
   this.successfulMoves = 0;
   this.ancestor = ancestor;
   // Initiate the original cell to the original values
@@ -80,6 +83,9 @@ Animal.prototype.tick = function() {
   if (this.cells.length <= 0 || this.health <= 0) {
     debug("This animal is dead! Put it into removal bin.");
 
+	// Some house keeping, report some stats to the world.
+	this.world.left += this.left;
+	this.world.right += this.right;
     // But before, calculate fitness point and see if it was good!
     var fitness = (this.successfulMoves * 20) +
                   ((this.moves > 0) * 100) +
@@ -177,62 +183,89 @@ Animal.prototype.tick = function() {
     cell.setActive(sumOfInputs);
   });
 
-  // Now calculate the motor cells and move the animal
-  var direction = 0;
-  i=0;
-  this.motorCells.forEach(function(cell){
-    // Add cell to the nodes
-    var cell_description = {};
-    cell_description.id = cell.id;
-    cell_description.label = cell.id;
-    cell_description.color = "green";
-    nodes.push(cell_description);
+	// Now calculate the motor cells and move the animal
+	var direction = 0;
+	i=0;  //Represents the cell order number. Every even cell wants to go right, odd cells want to go left.
+	this.motorCells.forEach(function(cell){
+		// Add cell to the nodes
+		var cell_description = {};
+		cell_description.id = cell.id;
+		cell_description.label = cell.id;
+		cell_description.color = "green";
+		nodes.push(cell_description);
 
-    // Check incoming connections
-    var sumOfInputs = 0; // sum of input to one cell from all its dendrites. Set to 0 before summing inputs.
-    cell.incomingDendrites.forEach(function(dendriteCell) {
-      // Add the edges to the reporting entity.
-      var edge = {};
-      edge.from = dendriteCell.id;
-      edge.to = cell.id;
-      edge.arrows = "to";
-      edge.color = "red";
-      edges.push(edge);
+		// Check incoming connections
+		var sumOfInputs = 0; // sum of input to one cell from all its dendrites. Set to 0 before summing inputs.
+		cell.incomingDendrites.forEach(function(dendriteCell) {
+			// Add the edges to the reporting entity.
+			var edge = {};
+			edge.from = dendriteCell.id;
+			edge.to = cell.id;
+			edge.arrows = "to";
+			edge.color = "red";
+			edges.push(edge);
 
-	    totalDendrites += 1;
-      if (dendriteCell.isActive()) {
-        //debug("Found active input cell!");
-        sumOfInputs += 1;
-      }
-    });
+			totalDendrites += 1;
+			if (dendriteCell.isActive()) {
+				//debug("Found active input cell!");
+				sumOfInputs += 1;
+			}
+		});
 
-    //if (sumOfInputs > 0) console.log("This MOTOR cell received " + sumOfInputs + " inputs!");
-	  totalInputs += sumOfInputs;
-    cell.setActive(sumOfInputs);
-	  if (cell.isActive()) if (i%2 == 0) direction +=1; else direction-=1;
-  });
+		//if (sumOfInputs > 0) console.log("This MOTOR cell received " + sumOfInputs + " inputs!");
+		totalInputs += sumOfInputs;
+		cell.setActive(sumOfInputs);
+
+		// Now, check if the cell is active and contribute to the move.
+		if (cell.isActive()) {
+			if (i % 2 == 0) {
+				direction += 1;
+			}
+			else {
+				direction -= 1;
+			}
+		}
+		// 
+		i++; // Next cell, next directions.
+	});
 
 
-  if (direction != 0) {
-	   debug("Motor cells active! We're moving towards: " + direction);
-     var oldPosition = this.position;
-     this.position += direction;
-     this.moves++;
+	if (direction != 0) {
+		debug("Motor cells active! We're moving towards: " + direction);
+		var oldPosition = this.position;
+		this.position += direction;
+		this.moves++;
 
-     // Now that we are moving, check if the move is successful. Are we moving away from danger? Or to food?
+		if (direction > 0) this.right++;
+		else this.left++;
+		console.log("Left/Right: " + this.left + "/" + this.right);
+		// Now that we are moving, check if the move is successful. Are we moving away from danger? Or to food?
+		if (this.position < 0) this.position = 0;
+		if (this.position > 1) this.position = 1;
 
-
-	   if (this.position < 0) this.position = 0;
-	   if (this.position > 1) this.position = 1;
-
-     if (this.position != oldPosition) { // We have actually moved...
-       debug("Moved, direction is " + direction + " and visual " + visualInput);
-       if ((visualInput[0]%2 == 1) && direction < 0) this.successfulMoves++;   // Food left in field - this cell should be active.
-       if ((visualInput[0] > 1) && direction > 0) this.successfulMoves++;  // Danger left in field - thiss cell
-       if ((visualInput[1]%2 == 1) && direction > 0) this.successfulMoves++;  // Food right in field - this cell should be active.
-       if ((visualInput[1] > 1) && direction < 0) this.successfulMoves++;  // Danger right in field - thiss cell
-     }
-  }
+		if (this.position != oldPosition) { // We have actually moved...
+			this.realMoves++;
+			console.log("Moved, direction is " + direction + " and visual " + visualInput);
+			if ((visualInput[0] % 2 == 1) && direction < 0) { 
+				this.successfulMoves++;   // Food left in field - this cell should be active.
+				console.log("Successful!");
+			}
+			if ((visualInput[0] > 1) && direction > 0) {
+				this.successfulMoves++;  // Danger left in field - thiss cell
+				console.log("Successful!");
+			}
+			if ((visualInput[1] % 2 == 1) && direction > 0) { 
+				this.successfulMoves++;  // Food right in field - this cell should be active.
+				console.log("Successful!");
+			}
+			if ((visualInput[1] > 1) && direction < 0) {
+				this.successfulMoves++;  // Danger right in field - thiss cell
+				console.log("Successful!");
+			}
+		} else {
+			console.log("Attempted to move in a wrong direction. Was in position " + this.position + ", wanted to move " + direction + "!");
+		}
+	}
 
 
   // Tabulate and report the neural cell handlings...
@@ -280,6 +313,9 @@ Animal.prototype.tick = function() {
   report.motorCellsActive = activeMotorCells;
   report.health = this.health;
   report.moves = this.moves;
+  report.left = this.left;
+  report.right = this.right;
+  report.realMoves = this.realMoves;
   report.successfulMoves = this.successfulMoves;
   report.totalFirings = this.totalNeuralMotorFirings;
   report.nodes = nodes;
