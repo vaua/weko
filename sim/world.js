@@ -50,13 +50,13 @@ function World() {
     this.visibleLocations[i] = oneRow;
   }
   this.visualInput = transformLocationsIntoVisualInput(this.visibleLocations);
-  debug("Visible locations: " + this.visibleLocations);
+  //debug("Visible locations: " + this.visibleLocations);
 }
 
 function transformLocationsIntoVisualInput(locations) {
 	var visualInput = [];
 
-	debug("Locations: " + locations);
+	//debug("Locations: " + locations);
 	for (i = 0; i < HORIZON; i++) {
 		var locationLayer = locations[i];
 		// Check for danger
@@ -99,7 +99,8 @@ World.prototype.createAnimals = function(numberOfAnimalsToCreate) {
     var dna = [];
     var type = Math.random();
     var ancestor;
-
+	
+//	dna = [ 103, 38, 33, 58, 5, 57, 66, 84, 54, 15, 69, 69, 95, 36, 20, 75, 92, 74, 59, 25, 64, 35, 43, 14, 88, 63, 76, 1, 92, 95, 22, 25, 88, 55, 95, 32, 10, 24, 83, 69, 5, 99, 69, 84, 33, 85, 7, 46, 60, 93, 13, 38, 65, 67, //103, 13, 36, 68, 58, 39, 78, 20, 85, 100, 19, 102, 57, 14, 80, 72, 41, 36, 4, 81, 22, 103, 56, 104, 104, 38, 86, 46, 56, 55, 69, 93, 19, 59, 96, 41, 32, 11, 106, 43, 11, 9, 8, 11, 64, 38];
     if ((this.dnaHallOfFame.dna === undefined) || (type < 0.5)) { // do random animal
       var dnaSize = Math.floor((Math.random() * DNA_MAX_SIZE) + DNA_MIN_SIZE);
       for (j = 0; j < dnaSize; j++) {
@@ -164,10 +165,9 @@ World.prototype.tick = function() {
   this.pointerToView = (this.pointerToView + 1) % HORIZON;
   this.visualInput = transformLocationsIntoVisualInput(this.visibleLocations);
 
-  debug("Visible localtions: " + this.visibleLocations);
-  debug("Visual input is: " + this.visualInput);
+  //debug("Visible localtions: " + this.visibleLocations);
+  //debug("Visual input is: " + this.visualInput);
 
-  debug("Sending the socket!");
   this.result.tickNr = this.tickNr;
   this.result.animalNr = this.animals.length;
   this.result.visualInput = this.visibleLocations[this.pointerToView];

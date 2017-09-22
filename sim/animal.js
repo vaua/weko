@@ -27,8 +27,12 @@ function Animal(dna, id, position, world, initialCell, ancestor) {
   this.realMoves = 0;
   this.successfulMoves = 0;
   this.ancestor = ancestor;
+  this.foodEatenLeft = 0;
+  this.dangerFacedLeft = 0;
+  this.foodEatenRight = 0;
+  this.dangerFacedRight = 0;
   // Initiate the original cell to the original values
-  this.health = 100;
+  this.health = 400;
   // Create the initial cell
   if (initialCell === undefined) {
 	this.cells.push(new Cell(this.id + "_" + this.cells.length, this, this.dna, {}, 0));
@@ -133,7 +137,7 @@ Animal.prototype.tick = function() {
   var visualInput = this.world.getVisualInput();
   debug("Obtained visual input: " + visualInput);
 
-  var i = 0;
+  var opticalCellNumber = 0;
   this.opticalCells.forEach(function(cell) {
     // Add cell to the nodes
     var cell_description = {};
@@ -142,12 +146,12 @@ Animal.prototype.tick = function() {
     cell_description.color = "yellow";
     nodes.push(cell_description);
     // There are four options in the world - every forth optical cell react to specific thing.
-    var rest = i%4;
+    var rest = opticalCellNumber % 4;
     if (rest == 0) if (visualInput[0]%2 == 1) cell.setActive(199);  // Food left in field - this cell should be active.
     if (rest == 1) if (visualInput[0] > 1) cell.setActive(199);  // Danger left in field - thiss cell
     if (rest == 2) if (visualInput[1]%2 == 1) cell.setActive(199);  // Food right in field - this cell should be active.
     if (rest == 3) if (visualInput[1] > 1) cell.setActive(199);  // Danger right in field - thiss cell
-    i+=1;
+    opticalCellNumber++;
   });
 
   var totalInputs = 0;
@@ -177,15 +181,14 @@ Animal.prototype.tick = function() {
 
       if ((dendriteCell.cellType == CellTypes.OPTICAL) && dendriteCell.isActive()) debug("Has connection with optic cell which is active.");
     });
-    //debug("Calculate sum of inputs: " + sumOfInputs);
-    //if (sumOfInputs > 0) console.log("This cell received " + sumOfInputs + " inputs!");
-	  totalInputs += sumOfInputs;
+
+	totalInputs += sumOfInputs;
     cell.setActive(sumOfInputs);
   });
 
-	// Now calculate the motor cells and move the animal
+	/* Now calculate the motor cells and move the animal */
 	var direction = 0;
-	i=0;  //Represents the cell order number. Every even cell wants to go right, odd cells want to go left.
+	var motorCellNumber = 0;
 	this.motorCells.forEach(function(cell){
 		// Add cell to the nodes
 		var cell_description = {};
@@ -212,26 +215,26 @@ Animal.prototype.tick = function() {
 			}
 		});
 
-		//if (sumOfInputs > 0) console.log("This MOTOR cell received " + sumOfInputs + " inputs!");
 		totalInputs += sumOfInputs;
 		cell.setActive(sumOfInputs);
 
 		// Now, check if the cell is active and contribute to the move.
 		if (cell.isActive()) {
-			if (i % 2 == 0) {
+			//console.log("Motor cell with number " + motorCellNumber + " is active!");
+			if (motorCellNumber % 2 == 0) {
 				direction += 1;
 			}
 			else {
 				direction -= 1;
 			}
 		}
-		// 
-		i++; // Next cell, next directions.
+
+		motorCellNumber++; // Next cell, next directions.
 	});
 
-
-	if (direction != 0) {
-		debug("Motor cells active! We're moving towards: " + direction);
+	/* Move the animal */
+	if ((direction * direction) > 1) {
+		//debug("Motor cells active! We're moving towards: " + direction);
 		var oldPosition = this.position;
 		this.position += direction;
 		this.moves++;
@@ -290,11 +293,23 @@ Animal.prototype.tick = function() {
   // Apply the food / danger
   if (this.position == 0) {
     // We're on the left side. We shouls still have visualInput as a variable
-    if (visualInput[0] % 2 == 1) this.health += HEALTH_GAIN_WHEN_FOOD; // Food was in the left area.
-    if (visualInput[0] > 1) this.health -= HEALTH_LOSS_WHEN_DANGER; // Danger was in the left area.
+    if (visualInput[0] % 2 == 1) {
+		this.health += HEALTH_GAIN_WHEN_FOOD; // Food was in the left area.
+		this.foodEatenLeft++;
+	}
+    if (visualInput[0] > 1) {
+		this.health -= HEALTH_LOSS_WHEN_DANGER; // Danger was in the left area.
+		this.dangerFacedLeft++;
+	}
   } else if (this.position == 1 ) {
-    if (visualInput[1] % 2 == 1) this.health += HEALTH_GAIN_WHEN_FOOD; // Food was in the right area.
-    if (visualInput[1] > 1) this.health -= HEALTH_LOSS_WHEN_DANGER; // Danger was in the right area.
+    if (visualInput[1] % 2 == 1) {
+		this.health += HEALTH_GAIN_WHEN_FOOD; // Food was in the right area.
+		this.foodEatenRight++;
+	}
+    if (visualInput[1] > 1) {
+		this.health -= HEALTH_LOSS_WHEN_DANGER; // Danger was in the right area.
+		this.dangerFacedRight++;
+	}
   } else {
     debug("The position is neither 0 or 1 but " + this.position + ". Error!");
   }
@@ -323,6 +338,10 @@ Animal.prototype.tick = function() {
   report.totalInputs = totalInputs;
   report.totalDendrites = totalDendrites;
   report.ancestor = this.ancestor;
+  report.foodEatenLeft = this.foodEatenLeft;
+  report.foodEatenRight = this.foodEatenRight;
+  report.dangerFacedLeft = this.dangerFacedLeft;
+  report.dangerFacedRight = this.dangerFacedRight;
 
   this.world.reportAnimal(report);
 
