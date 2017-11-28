@@ -1,3 +1,6 @@
+var Protein = require("./protein.js");
+
+
 var id;
 var dna;
 var parentAnimal;
@@ -11,57 +14,6 @@ var AGE_WHEN_CELL_CAN_DIE = 100;
 var RISK_OF_CELL_DEATH_OF_OLD_AGE = 0.02
 var NEURON_FIRING_THRESHOLD = 1;
 
-// Proteins definitions
-var REDUCTION_START = 0;
-var REDUCTION_LENGTH = 1;
-var DIVISION_START = REDUCTION_START + REDUCTION_LENGTH;
-var DIVISION_LENGTH = 10;
-var NEURON_START = DIVISION_START + DIVISION_LENGTH;
-var NEURON_LENGTH = 10;
-var CONNECT_DENDRITES_START = NEURON_START + NEURON_LENGTH;
-var CONNECT_DENDRITES_LENGTH = 5;
-var DISCONNECT_DENDRITES_START = CONNECT_DENDRITES_START + CONNECT_DENDRITES_LENGTH;
-var DISCONNECT_DENDRITES_LENGTH = 5;
-var BLOCK_CONNECT_DENDRITES_START = DISCONNECT_DENDRITES_START + DISCONNECT_DENDRITES_LENGTH;
-var BLOCK_CONNECT_DENDRITES_LENGTH = 5;
-var BLOCK_DISCONNECT_DENDRITES_START = BLOCK_CONNECT_DENDRITES_START + BLOCK_CONNECT_DENDRITES_LENGTH;
-var BLOCK_DISCONNECT_DENDRITES_LENGTH = 5;
-var CONNECT_AXON_START = BLOCK_DISCONNECT_DENDRITES_START + BLOCK_DISCONNECT_DENDRITES_LENGTH;
-var CONNECT_AXON_LENGTH = 10;
-var BLOCK_CONNECT_AXON_START = CONNECT_AXON_START + CONNECT_AXON_LENGTH;
-var BLOCK_CONNECT_AXON_LENGTH = 5;
-var ACCEPT_DENDRITES_START = BLOCK_CONNECT_AXON_START + BLOCK_CONNECT_AXON_LENGTH;
-var ACCEPT_DENDRITES_LENGTH = 5;
-var BLOCK_ACCEPT_DENDRITES_START = ACCEPT_DENDRITES_START + ACCEPT_DENDRITES_LENGTH;
-var BLOCK_ACCEPT_DENDRITES_LENGTH = 5;
-var MOTOR_CELL_START = BLOCK_ACCEPT_DENDRITES_START + BLOCK_ACCEPT_DENDRITES_LENGTH;
-var MOTOR_CELL_LENGTH = 10;
-var OPTICAL_CELL_START = MOTOR_CELL_START + MOTOR_CELL_LENGTH;
-var OPTICAL_CELL_LENGTH = 10;
-var SPAWN_ANIMAL_START = OPTICAL_CELL_START + OPTICAL_CELL_LENGTH;
-var SPAWN_ANIMAL_LENGTH = 10;
-var NO_PROTEIN_START = SPAWN_ANIMAL_START + SPAWN_ANIMAL_LENGTH;
-var NO_PROTEIN_LENGTH = 10;
-
-ALL_PROTEINS_LENGTH = NO_PROTEIN_START + NO_PROTEIN_LENGTH;
-
-
-
-var Proteins = {
-  REDUCES_PROTEINS :        REDUCTION_START,                 // 0, Reduces the number of all proteins to half (but does not affect permanen proteins)
-  START_CELL_DIVISION :     DIVISION_START,                  // 1, If this protein is expressed, the cell will devide itself
-  NEURON :                  NEURON_START,                    // 11, Cell will get an axon that will connect to all at that time receptive axons. Permanent, makes cell neural cell.
-  CONNECT_DENDRITES:        CONNECT_DENDRITES_START,         // 21, Neural cell will connect its axon to currently receptive dendrites
-  DISCONNECT_DENDRITES:     DISCONNECT_DENDRITES_START,      // 26, Neural cell will disconnect X least used dendrites.
-  BLOCK_CONNECT_DENDRITES:  BLOCK_CONNECT_DENDRITES_START,   // Blockerar protein that connects dendrites.
-  CONNECT_AXON:             CONNECT_AXON_START,              // Neural cell connects to all receptive axons
-  BLOCK_CONNECT_AXON:       BLOCK_CONNECT_AXON_START,        // Block cell from connecting to axons
-  ACCEPT_DENDRITES:         ACCEPT_DENDRITES_START,          // Neural cell accepts dendrites
-  BLOCK_ACCEPT_DENDRITES:   BLOCK_ACCEPT_DENDRITES_START,    // Blocks acceptance for dendrites
-  DEVELOP_MOTOR_CELL:       MOTOR_CELL_START,                // Upon new cell division, this cell becomes motor cell
-  DEVELOP_OPTICAL_CELL:     OPTICAL_CELL_START,              // Upon cell division, the daughter cell becomes optical cell.
-  SPAWN_ANIMAL:				SPAWN_ANIMAL_START
-}
 
 CellTypes = {
   NONE : 0,
@@ -166,48 +118,11 @@ Cell.prototype.tick = function() {
     debug("Expressing gene " + this.positionInDna + " with protein " + this.dna[this.positionInDna]);
 
     // Expressing the genes
-    var proteinExpressed = this.dna[this.positionInDna];
-
-    // Nested if-statements checking which protein has been expressed.
-    if (proteinExpressed < DIVISION_START) { // REDUCTION is expressed.
-		addProteinIntoTheMix(this.proteins, Proteins.REDUCES_PROTEINS, 1);
-    } else if (proteinExpressed < NEURON_START) {
-		addProteinIntoTheMix(this.proteins, Proteins.START_CELL_DIVISION, (proteinExpressed - DIVISION_START) + 1);
-		debug('division.');
-    } else if (proteinExpressed < CONNECT_DENDRITES_START) {
-		addProteinIntoTheMix(this.proteins, Proteins.NEURON, 1);
-		debug("Neuron");
-    } else if (proteinExpressed < DISCONNECT_DENDRITES_START) {
-		addProteinIntoTheMix(this.proteins, Proteins.CONNECT_DENDRITES, (proteinExpressed - CONNECT_DENDRITES_START) + 1);
-		debug("Connect dendrites");
-    } else if (proteinExpressed < BLOCK_CONNECT_DENDRITES_START) {
-		addProteinIntoTheMix(this.proteins, Proteins.DISCONNECT_DENDRITES, (proteinExpressed - DISCONNECT_DENDRITES_START) + 1);
-		debug("Disconnect dendrites");
-    } else if (proteinExpressed < CONNECT_AXON_START) {
-		addProteinIntoTheMix(this.proteins, Proteins.BLOCK_CONNECT_DENDRITES, (proteinExpressed - BLOCK_CONNECT_DENDRITES_START) + 1);
-		debug("Block conect dendrites");
-    } else if (proteinExpressed < BLOCK_CONNECT_AXON_START) {
-		addProteinIntoTheMix(this.proteins, Proteins.CONNECT_AXON, (proteinExpressed - CONNECT_AXON_START) + 1);
-		debug("Axon start");
-    } else if (proteinExpressed < ACCEPT_DENDRITES_START) {
-		addProteinIntoTheMix(this.proteins, Proteins.BLOCK_CONNECT_AXON, (proteinExpressed - BLOCK_CONNECT_AXON_START) + 1);
-		debug("Block connect axon");
-    } else if (proteinExpressed < BLOCK_ACCEPT_DENDRITES_START) {
-		addProteinIntoTheMix(this.proteins, Proteins.ACCEPT_DENDRITES, (proteinExpressed - ACCEPT_DENDRITES_START) + 1);
-		debug("Accept dendrites start");
-    } else if (proteinExpressed < MOTOR_CELL_START) {
-		addProteinIntoTheMix(this.proteins, Proteins.BLOCK_ACCEPT_DENDRITES, (proteinExpressed - BLOCK_ACCEPT_DENDRITES_START) + 1);
-		debug("Block accept dendrites");
-    } else if (proteinExpressed < OPTICAL_CELL_START) {
-		addProteinIntoTheMix(this.proteins, Proteins.DEVELOP_MOTOR_CELL, (proteinExpressed - MOTOR_CELL_START) + 1);
-		debug("Motor cell");
-    } else if (proteinExpressed < SPAWN_ANIMAL_START) {
-		addProteinIntoTheMix(this.proteins, Proteins.DEVELOP_OPTICAL_CELL, (proteinExpressed - OPTICAL_CELL_START) + 1);
-		debug("Optical cell");
-    } else if (proteinExpressed < NO_PROTEIN_START) {
-		//addProteinIntoTheMix(this.proteins, Proteins.SPAWN_ANIMAL, 1);
-		debug("Spawning new animal.");
-    }
+    var geneExpressed = this.dna[this.positionInDna];
+    var proteinChange = Protein.expressGene(geneExpressed);
+    Object.keys(proteinChange).forEach(function(key) {
+      addProteinIntoTheMix(that.proteins, key, proteinChange[key]);
+    });
   } else {
     debug("The DNA position " + this.positionInDna + " is outside of the size od DNA. No protein was expressed.");
   }
@@ -215,14 +130,15 @@ Cell.prototype.tick = function() {
   // increase positionInDna
   this.positionInDna += 1;
 
-  if (this.hasProtein(Proteins.NEURON) && this.cellType == CellTypes.NONE) {
+  if (this.hasProtein(Protein.defs.NEURON) && this.cellType == CellTypes.NONE) {
     debug("I am a neuron cell!");
     this.cellType = CellTypes.NEURON;
   }
 
 
-  if (this.hasProtein(Proteins.SPAWN_ANIMAL)) {
-    debug("Spawning!");
+  if (this.hasProtein(Protein.defs.SPAWN_ANIMAL)) {
+    debug("Spawning! But let's wait with that for a minute...");
+    /*
     debug("First, create a new cell!");
     //TODO: Reduce protein mix to half before spawing the cell.
     reduceProteinMixByHalf(this.proteins);
@@ -234,15 +150,16 @@ Cell.prototype.tick = function() {
     });
     this.parentAnimal.spawnNewAnimal(this.dna, this.proteins, this.cellType);
     this.parentAnimal.health -= 10; // Reduce the health upon birth, significantly
+    */
   }
 
   // Now, do actions for all proteins found in the cell
-  if (this.hasProtein(Proteins.REDUCES_PROTEINS)) {
+  if (this.hasProtein(Protein.defs.REDUCES_PROTEINS)) {
     debug("Reducing proteins (not yet).");
     //reduceProteinMixByHalf(this.proteins);
   }
 
-  if (this.hasProtein(Proteins.START_CELL_DIVISION)) {
+  if (this.hasProtein(Protein.defs.START_CELL_DIVISION)) {
     debug("Creating new cell!");
     //TODO: Reduce protein mix to half before spawing the cell.
     reduceProteinMixByHalf(this.proteins);
@@ -258,32 +175,32 @@ Cell.prototype.tick = function() {
 
   //TODO: Some of the checks in here will need to be splitted out for optical, motor cells.
   if (this.cellType > CellTypes.NONE) {
-    if (this.hasProtein(Proteins.CONNECT_DENDRITES) && this.cellType != CellTypes.MOTOR) {  // Motor cell has no dendrites - its firing affects the movement
+    if (this.hasProtein(Protein.defs.CONNECT_DENDRITES) && this.cellType != CellTypes.MOTOR) {  // Motor cell has no dendrites - its firing affects the movement
       debug("Connecting dendrites");
       this.parentAnimal.addCellWithWillingDendrites(this);
     }
 
-    if (this.hasProtein(Proteins.ACCEPT_DENDRITES) && this.cellType != CellTypes.OPTICAL) { // Optical cells need no incoming dendrites - they are driven by inputs directly
+    if (this.hasProtein(Protein.defs.ACCEPT_DENDRITES) && this.cellType != CellTypes.OPTICAL) { // Optical cells need no incoming dendrites - they are driven by inputs directly
       debug("Accepting dendrites");
       this.parentAnimal.addCellAcceptingDendrites(this);
     }
 
-    if (this.hasProtein(Proteins.DICCONNECT_DENDRITES)) {
+    if (this.hasProtein(Protein.defs.DICCONNECT_DENDRITES)) {
       debug("Disconnecting dendrites");
       //TODO: Implement
     }
 
-    if (this.hasProtein(Proteins.CONNECT_AXON)) {
+    if (this.hasProtein(Protein.defs.CONNECT_AXON)) {
       debug("Connecting Axon!");
       //TODO: Most likely remove.
     }
 
-    if (this.hasProtein(Proteins.DEVELOP_MOTOR_CELL) && (this.cellType == CellTypes.NEURON)) { // If this is plane neuron, now it will become motor cell
+    if (this.hasProtein(Protein.defs.DEVELOP_MOTOR_CELL) && (this.cellType == CellTypes.NEURON)) { // If this is plane neuron, now it will become motor cell
       debug("I'm a motor cell now!");
       this.cellType = CellTypes.MOTOR;
     }
 
-    if (this.hasProtein(Proteins.DEVELOP_OPTICAL_CELL) && (this.cellType == CellTypes.NEURON)) { // If this is a plane neuron, now it will become optical cell
+    if (this.hasProtein(Protein.defs.DEVELOP_OPTICAL_CELL) && (this.cellType == CellTypes.NEURON)) { // If this is a plane neuron, now it will become optical cell
       debug("I'm an optical cell now!");
       this.cellType = CellTypes.OPTICAL;
     }
