@@ -61,45 +61,48 @@ Protein.defs = Proteins;
 /* This function takes in a gene, and returns the proteins added by the gene */
 Protein.expressGene = function(geneExpressed) {
   var proteinChange = {};
+  proteinChange[Proteins.REDUCES_PROTEINS] = 0;
+  proteinChange[Proteins.NEURON] = 0;
+  proteinChange[Proteins.SPAWN_ANIMAL] = 0;
 
   // Nested if-statements checking which protein has been expressed.
   if (geneExpressed < DIVISION_START) { // REDUCTION is expressed.
-    proteinChange[Proteins.REDUCES_PROTEINS] = 1;
+    proteinChange[Proteins.REDUCES_PROTEINS] += 10;
   } else if (geneExpressed < NEURON_START) {
-    proteinChange[Proteins.START_CELL_DIVISION] = (geneExpressed - DIVISION_START) + 1;
+    proteinChange[Proteins.START_CELL_DIVISION] = ((geneExpressed - DIVISION_START) + 1) * 2;
     debug('division.');
   } else if (geneExpressed < CONNECT_DENDRITES_START) {
-    proteinChange[Proteins.NEURON] = 1;
-    debug("Neuron");
+    proteinChange[Proteins.NEURON] += 10;
+    debug("Neuron, proteint change is " + proteinChange[Proteins.NEURON]);
   } else if (geneExpressed < DISCONNECT_DENDRITES_START) {
-    proteinChange[Proteins.CONNECT_DENDRITES] = (geneExpressed - CONNECT_DENDRITES_START) + 1;
+    proteinChange[Proteins.CONNECT_DENDRITES] = ((geneExpressed - CONNECT_DENDRITES_START) + 1) * 10;
     debug("Connect dendrites");
   } else if (geneExpressed < BLOCK_CONNECT_DENDRITES_START) {
-    proteinChange[Proteins.DISCONNECT_DENDRITES] = (geneExpressed - DISCONNECT_DENDRITES_START) + 1;
+    proteinChange[Proteins.DISCONNECT_DENDRITES] = ((geneExpressed - DISCONNECT_DENDRITES_START) + 1) * 10;
     debug("Disconnect dendrites");
   } else if (geneExpressed < CONNECT_AXON_START) {
-    proteinChange[Proteins.BLOCK_CONNECT_DENDRITES] = (geneExpressed - BLOCK_CONNECT_DENDRITES_START) + 1;
+    proteinChange[Proteins.BLOCK_CONNECT_DENDRITES] = ((geneExpressed - BLOCK_CONNECT_DENDRITES_START) + 1) * 10;
     debug("Block conect dendrites");
   } else if (geneExpressed < BLOCK_CONNECT_AXON_START) {
-    proteinChange[Proteins.CONNECT_AXON] = (geneExpressed - CONNECT_AXON_START) + 1;
+    proteinChange[Proteins.CONNECT_AXON] = ((geneExpressed - CONNECT_AXON_START) + 1) * 10;
     debug("Axon start");
   } else if (geneExpressed < ACCEPT_DENDRITES_START) {
-    proteinChange[Proteins.BLOCK_CONNECT_AXON] = (geneExpressed - BLOCK_CONNECT_AXON_START) + 1;
+    proteinChange[Proteins.BLOCK_CONNECT_AXON] = ((geneExpressed - BLOCK_CONNECT_AXON_START) + 1) * 10;
     debug("Block connect axon");
   } else if (geneExpressed < BLOCK_ACCEPT_DENDRITES_START) {
-    proteinChange[Proteins.ACCEPT_DENDRITES] = (geneExpressed - ACCEPT_DENDRITES_START) + 1;
+    proteinChange[Proteins.ACCEPT_DENDRITES] = ((geneExpressed - ACCEPT_DENDRITES_START) + 1) * 10;
     debug("Accept dendrites start");
   } else if (geneExpressed < MOTOR_CELL_START) {
-    proteinChange[Proteins.BLOCK_ACCEPT_DENDRITES] = (geneExpressed - BLOCK_ACCEPT_DENDRITES_START) + 1;
+    proteinChange[Proteins.BLOCK_ACCEPT_DENDRITES] = ((geneExpressed - BLOCK_ACCEPT_DENDRITES_START) + 1) * 10 ;
     debug("Block accept dendrites");
   } else if (geneExpressed < OPTICAL_CELL_START) {
-    proteinChange[Proteins.DEVELOP_MOTOR_CELL] = (geneExpressed - MOTOR_CELL_START) + 1;
+    proteinChange[Proteins.DEVELOP_MOTOR_CELL] = ((geneExpressed - MOTOR_CELL_START) + 1) * 10;
     debug("Motor cell");
   } else if (geneExpressed < SPAWN_ANIMAL_START) {
-    proteinChange[Proteins.DEVELOP_OPTICAL_CELL] = (geneExpressed - OPTICAL_CELL_START) + 1;
+    proteinChange[Proteins.DEVELOP_OPTICAL_CELL] = ((geneExpressed - OPTICAL_CELL_START) + 1) * 10;
     debug("Optical cell");
   } else if (geneExpressed < NO_PROTEIN_START) {
-    proteinChange[Proteins.SPAWN_ANIMAL] = 1;
+    proteinChange[Proteins.SPAWN_ANIMAL] += 2;
     debug("Spawning new animal.");
   }
 

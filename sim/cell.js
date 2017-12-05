@@ -1,6 +1,5 @@
 var Protein = require("./protein.js");
 
-
 var id;
 var dna;
 var parentAnimal;
@@ -206,8 +205,8 @@ Cell.prototype.tick = function() {
     }
   }
 
-  // Once done with all actions, reduce all protein concentrations by 1
-  reduceProteinMixByOne(this.proteins);
+  // Once done with all actions, reduce all protein concentrations by half
+  reduceProteinMixByHalf(this.proteins);
 
   // run the neural network, inputs, inter, outputs
 }
