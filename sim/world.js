@@ -1,15 +1,6 @@
 var debug = require('debug')('world');
 var Animal = require('./animal.js')
-
-var runForTicks = 150;
-var HORIZON = 3;
-var DNA_MIN_SIZE = 10;
-var DNA_MAX_SIZE = 400;
-var WORLD_WIDTH = 2;
-var CHANCE_OF_FOOD = 0.3;
-var RISK_OF_DANGER = 0.3;
-var NUMBER_OF_PROTEINS = ALL_PROTEINS_LENGTH;
-
+var Constant = require('./constants.js');
 
 function World() {
   this.tickNr = 0;
@@ -26,6 +17,7 @@ function World() {
   this.right = 0;
   this.dnaHallOfFame = {}; // Currenly object, animal id, age, acquiered points and DNA
 
+
   //Comment - how to do DNA for new animals
   // Point system, upon death.
   // 1. Moving, to food / away from danger. If  >50% of moves are towards food, away from danger, than this is awarded.
@@ -33,19 +25,18 @@ function World() {
   // 3. Firing Neurons.
   // 4. Age at death - if more than 70.
 
-
   // prepare the world
   // Populate the view with food and danger
-  for (i = 0; i < HORIZON; i++) {
+  for (i = 0; i < Constant.HORIZON; i++) {
     oneRow = [];
-    for (j = 0; j < WORLD_WIDTH; j++) {
-      if (Math.random() < CHANCE_OF_FOOD) {
+    for (j = 0; j < Constant.WORLD_WIDTH; j++) {
+      if (Math.random() < Constant.CHANCE_OF_FOOD) {
         oneRow[j] = 1;
       }
       else {
         oneRow[j] = 0;
       }
-      if (Math.random() < RISK_OF_DANGER) oneRow[j] += 2;
+      if (Math.random() < Constant.RISK_OF_DANGER) oneRow[j] += 2;
     }
     this.visibleLocations[i] = oneRow;
   }
@@ -57,30 +48,30 @@ function transformLocationsIntoVisualInput(locations) {
 	var visualInput = [];
 
 	//debug("Locations: " + locations);
-	for (i = 0; i < HORIZON; i++) {
+	for (i = 0; i < Constant.HORIZON; i++) {
 		var locationLayer = locations[i];
 		// Check for danger
 		if (locationLayer[0] == 2 || locationLayer[0] == 3) {
-			visualInput[i * WORLD_WIDTH] = 1;
+			visualInput[i * Constant.WORLD_WIDTH] = 1;
 		}  else {
-			visualInput[i * WORLD_WIDTH] = 0;
+			visualInput[i * Constant.WORLD_WIDTH] = 0;
 		}
 		if (locationLayer[1] == 2 || locationLayer[1] == 3) {
-			visualInput[i * WORLD_WIDTH + 1] = 1;
+			visualInput[i * Constant.WORLD_WIDTH + 1] = 1;
 		}  else {
-			visualInput[i * WORLD_WIDTH + 1] = 0;
+			visualInput[i * Constant.WORLD_WIDTH + 1] = 0;
 		}
 
 		// Check for food
 		if (locationLayer[0] == 1 || locationLayer[0] == 3) {
-			visualInput[i * WORLD_WIDTH + 2] = 1;
+			visualInput[i * Constant.WORLD_WIDTH + 2] = 1;
 		}  else {
-			visualInput[i * WORLD_WIDTH + 2] = 0;
+			visualInput[i * Constant.WORLD_WIDTH + 2] = 0;
 		}
 		if (locationLayer[1] == 1 || locationLayer[1] == 3) {
-			visualInput[i * WORLD_WIDTH + 3] = 1;
+			visualInput[i * Constant.WORLD_WIDTH + 3] = 1;
 		}  else {
-			visualInput[i * WORLD_WIDTH + 3] = 0;
+			visualInput[i * Constant.WORLD_WIDTH + 3] = 0;
 		}
 	}
 	return visualInput;
@@ -99,20 +90,23 @@ World.prototype.createAnimals = function(numberOfAnimalsToCreate) {
     var dna = [];
     var type = Math.random();
     var ancestor;
-	
+
 //	dna = [ 103, 38, 33, 58, 5, 57, 66, 84, 54, 15, 69, 69, 95, 36, 20, 75, 92, 74, 59, 25, 64, 35, 43, 14, 88, 63, 76, 1, 92, 95, 22, 25, 88, 55, 95, 32, 10, 24, 83, 69, 5, 99, 69, 84, 33, 85, 7, 46, 60, 93, 13, 38, 65, 67, //103, 13, 36, 68, 58, 39, 78, 20, 85, 100, 19, 102, 57, 14, 80, 72, 41, 36, 4, 81, 22, 103, 56, 104, 104, 38, 86, 46, 56, 55, 69, 93, 19, 59, 96, 41, 32, 11, 106, 43, 11, 9, 8, 11, 64, 38];
     if ((this.dnaHallOfFame.dna === undefined) || (type < 0.5)) { // do random animal
-      var dnaSize = Math.floor((Math.random() * DNA_MAX_SIZE) + DNA_MIN_SIZE);
+
+      var dnaSize = Math.floor((Math.random() * Constant.DNA_MAX_SIZE) + Constant.DNA_MIN_SIZE);
+      debug("DNA size: " + dnaSize);
       for (j = 0; j < dnaSize; j++) {
-        dna.push(Math.floor((Math.random() * NUMBER_OF_PROTEINS) + 1));
+        dna.push(Math.floor((Math.random() * Constant.NUMBER_OF_PROTEINS) + 1));
       }
     } else {
       dna = this.dnaHallOfFame.dna;
       ancestor = this.dnaHallOfFame.id;
       debug("Created copied animal, " + (this.animalId + 1) + " is clone of " + this.dnaHallOfFame.id);
     }
+    debug("Dna is " + dna);
 
-    var place = Math.floor(Math.random() * WORLD_WIDTH);
+    var place = Math.floor(Math.random() * Constant.WORLD_WIDTH);
     this.animals.push(new Animal(dna, this.animalId++, place, this, undefined, ancestor));
   }
 }
@@ -150,19 +144,19 @@ World.prototype.tick = function() {
 
   // create new food at the current locations
   oneRow = [];
-  for (j = 0; j < WORLD_WIDTH; j++) {
-    if (Math.random() < CHANCE_OF_FOOD) {
+  for (j = 0; j < Constant.WORLD_WIDTH; j++) {
+    if (Math.random() < Constant.CHANCE_OF_FOOD) {
       oneRow[j] = 1;
     }
     else {
       oneRow[j] = 0;
     }
-    if (Math.random() < RISK_OF_DANGER) oneRow[j] += 2;
+    if (Math.random() < Constant.RISK_OF_DANGER) oneRow[j] += 2;
   }
 
   this.visibleLocations[this.pointerToView] = oneRow;
   // Increase the pointerToView
-  this.pointerToView = (this.pointerToView + 1) % HORIZON;
+  this.pointerToView = (this.pointerToView + 1) % Constant.HORIZON;
   this.visualInput = transformLocationsIntoVisualInput(this.visibleLocations);
 
   //debug("Visible localtions: " + this.visibleLocations);

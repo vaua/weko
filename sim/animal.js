@@ -1,10 +1,6 @@
 var Cell = require("./cell.js");
 var debug = require('debug')('animal');
-
-var dnaLength = Cell.ALL_PROTEINS_LENGTH;
-var HEALTH_GAIN_WHEN_FOOD = 5;
-var HEALTH_LOSS_WHEN_DANGER = 7;
-
+var Constant = require('./constants.js');
 
 function Animal(dna, id, position, world, initialCell, ancestor) {
   this.dna = dna;
@@ -249,7 +245,7 @@ Animal.prototype.tick = function() {
 		if (this.position != oldPosition) { // We have actually moved...
 			this.realMoves++;
 			console.log("Moved, direction is " + direction + " and visual " + visualInput);
-			if ((visualInput[0] % 2 == 1) && direction < 0) { 
+			if ((visualInput[0] % 2 == 1) && direction < 0) {
 				this.successfulMoves++;   // Food left in field - this cell should be active.
 				console.log("Successful!");
 			}
@@ -257,7 +253,7 @@ Animal.prototype.tick = function() {
 				this.successfulMoves++;  // Danger left in field - thiss cell
 				console.log("Successful!");
 			}
-			if ((visualInput[1] % 2 == 1) && direction > 0) { 
+			if ((visualInput[1] % 2 == 1) && direction > 0) {
 				this.successfulMoves++;  // Food right in field - this cell should be active.
 				console.log("Successful!");
 			}
@@ -294,20 +290,20 @@ Animal.prototype.tick = function() {
   if (this.position == 0) {
     // We're on the left side. We shouls still have visualInput as a variable
     if (visualInput[0] % 2 == 1) {
-		this.health += HEALTH_GAIN_WHEN_FOOD; // Food was in the left area.
+		this.health += Constant.HEALTH_GAIN_WHEN_FOOD; // Food was in the left area.
 		this.foodEatenLeft++;
 	}
     if (visualInput[0] > 1) {
-		this.health -= HEALTH_LOSS_WHEN_DANGER; // Danger was in the left area.
+		this.health -= Constant.HEALTH_LOSS_WHEN_DANGER; // Danger was in the left area.
 		this.dangerFacedLeft++;
 	}
   } else if (this.position == 1 ) {
     if (visualInput[1] % 2 == 1) {
-		this.health += HEALTH_GAIN_WHEN_FOOD; // Food was in the right area.
+		this.health += Constant.HEALTH_GAIN_WHEN_FOOD; // Food was in the right area.
 		this.foodEatenRight++;
 	}
     if (visualInput[1] > 1) {
-		this.health -= HEALTH_LOSS_WHEN_DANGER; // Danger was in the right area.
+		this.health -= Constant.HEALTH_LOSS_WHEN_DANGER; // Danger was in the right area.
 		this.dangerFacedRight++;
 	}
   } else {

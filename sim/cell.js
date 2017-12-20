@@ -1,18 +1,15 @@
 var Protein = require("./protein.js");
+var Constant = require('./constants.js');
+var debug = require('debug')('cell');
 
 var id;
 var dna;
 var parentAnimal;
 var markedForDeath;
-var debug = require('debug')('cell');
 var proteins = {};
 var cellAge;
 var cellType;
 var active;
-var AGE_WHEN_CELL_CAN_DIE = 100;
-var RISK_OF_CELL_DEATH_OF_OLD_AGE = 0.02
-var NEURON_FIRING_THRESHOLD = 1;
-
 
 CellTypes = {
   NONE : 0,
@@ -77,7 +74,7 @@ Cell.prototype.isActive = function() {
 }
 
 Cell.prototype.setActive = function(activeInputs) {
-  if (activeInputs > NEURON_FIRING_THRESHOLD) {
+  if (activeInputs > Constant.NEURON_FIRING_THRESHOLD) {
     this.active = true;
     //if (activeInputs != 199) console.log("Cell is firing.");
   }
@@ -96,9 +93,9 @@ Cell.prototype.tick = function() {
   debug("Cell " + this.id + " is entering its " + this.cellAge + " tick.");
 
   // check cell age and kill cell if it dies.
-  if (this.cellAge > AGE_WHEN_CELL_CAN_DIE) {
+  if (this.cellAge > Constant.AGE_WHEN_CELL_CAN_DIE) {
     // cell can die - some risk is applied
-    if (Math.random() < RISK_OF_CELL_DEATH_OF_OLD_AGE) {
+    if (Math.random() < Constant.RISK_OF_CELL_DEATH_OF_OLD_AGE) {
       //cell dies
       this.parentAnimal.addForRemoval(this);
     }
