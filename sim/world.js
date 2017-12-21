@@ -97,7 +97,7 @@ World.prototype.createAnimals = function(numberOfAnimalsToCreate) {
       var dnaSize = Math.floor((Math.random() * Constant.DNA_MAX_SIZE) + Constant.DNA_MIN_SIZE);
       debug("DNA size: " + dnaSize);
       for (j = 0; j < dnaSize; j++) {
-        dna.push(Math.floor((Math.random() * Constant.NUMBER_OF_PROTEINS) + 1));
+        dna.push(Math.floor((Math.random() * ALL_PROTEINS_LENGTH) + 1));
       }
     } else {
       dna = this.dnaHallOfFame.dna;
