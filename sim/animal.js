@@ -27,6 +27,7 @@ function Animal(dna, id, position, world, initialCell, ancestor) {
   this.dangerFacedLeft = 0;
   this.foodEatenRight = 0;
   this.dangerFacedRight = 0;
+  this.motorCellNumber = 0;
   // Initiate the original cell to the original values
   this.health = 400;
   // Create the initial cell
@@ -56,6 +57,7 @@ Animal.prototype.tick = function() {
   this.deadCells = [];
   this.age++;
 
+  this.proteins = null;
 
   this.cells.forEach(function(cell) {
     //debug("Ticking a cell with id: " + cell.id + ".");
@@ -83,9 +85,9 @@ Animal.prototype.tick = function() {
   if (this.cells.length <= 0 || this.health <= 0) {
     debug("This animal is dead! Put it into removal bin.");
 
-	// Some house keeping, report some stats to the world.
-	this.world.left += this.left;
-	this.world.right += this.right;
+    // Some house keeping, report some stats to the world.
+    this.world.left += this.left;
+    this.world.right += this.right;
     // But before, calculate fitness point and see if it was good!
     var fitness = (this.successfulMoves * 20) +
                   ((this.moves > 0) * 100) +
@@ -115,16 +117,13 @@ Animal.prototype.tick = function() {
   // Adjust the cell connections - connect every willing cell with every willing dendrite
   this.cellsAcceptingDendrites.forEach(function(cell) {
     cell.addIncomingDendrites(that.cellsWithWillingDendrites);
-    //debug("Added " + that.cellsWithWillingDendrites.length + " to cell with id " + cell.id);
+    debug("Added " + that.cellsWithWillingDendrites.length + " to cell with id " + cell.id);
   });
   // Now wipe these two lists as we have added all needed connections
   this.cellsAcceptingDendrites.clear();
   this.cellsWithWillingDendrites.clear();
 
   // Now, all cells have ticked. Let's run the neural network.
-  //WHAT IS THIS?? NEEDED? var allInputGivingCells = this.neuralCells.concat(this.opticalCells);
-
-
   // Get inputs from the world and set optical cells.
   // Position: 0: food left, 1: danger left, 2: food right, 3: danger right.
   // Inputs get these values in order.
@@ -184,7 +183,7 @@ Animal.prototype.tick = function() {
 
 	/* Now calculate the motor cells and move the animal */
 	var direction = 0;
-	var motorCellNumber = 0;
+
 	this.motorCells.forEach(function(cell){
 		// Add cell to the nodes
 		var cell_description = {};
@@ -217,7 +216,7 @@ Animal.prototype.tick = function() {
 		// Now, check if the cell is active and contribute to the move.
 		if (cell.isActive()) {
 			//console.log("Motor cell with number " + motorCellNumber + " is active!");
-			if (motorCellNumber % 2 == 0) {
+			if (that.motorCellNumber % 2 == 0) {
 				direction += 1;
 			}
 			else {
@@ -225,10 +224,11 @@ Animal.prototype.tick = function() {
 			}
 		}
 
-		motorCellNumber++; // Next cell, next directions.
+		that.motorCellNumber++; // Next cell, next directions.
 	});
 
 	/* Move the animal */
+  //console.log("Direction: " + direction);
 	if ((direction * direction) > 1) {
 		//debug("Motor cells active! We're moving towards: " + direction);
 		var oldPosition = this.position;
@@ -237,32 +237,34 @@ Animal.prototype.tick = function() {
 
 		if (direction > 0) this.right++;
 		else this.left++;
-		console.log("Left/Right: " + this.left + "/" + this.right);
+		//console.log("Left/Right: " + this.left + "/" + this.right);
 		// Now that we are moving, check if the move is successful. Are we moving away from danger? Or to food?
 		if (this.position < 0) this.position = 0;
 		if (this.position > 1) this.position = 1;
 
 		if (this.position != oldPosition) { // We have actually moved...
 			this.realMoves++;
-			console.log("Moved, direction is " + direction + " and visual " + visualInput);
+			//console.log("Moved, direction is " + direction + " and visual " + visualInput);
 			if ((visualInput[0] % 2 == 1) && direction < 0) {
 				this.successfulMoves++;   // Food left in field - this cell should be active.
 				console.log("Successful!");
 			}
-			if ((visualInput[0] > 1) && direction > 0) {
+			else if ((visualInput[0] > 1) && direction > 0) {
 				this.successfulMoves++;  // Danger left in field - thiss cell
 				console.log("Successful!");
 			}
-			if ((visualInput[1] % 2 == 1) && direction > 0) {
+			else if ((visualInput[1] % 2 == 1) && direction > 0) {
 				this.successfulMoves++;  // Food right in field - this cell should be active.
 				console.log("Successful!");
 			}
-			if ((visualInput[1] > 1) && direction < 0) {
+			else if ((visualInput[1] > 1) && direction < 0) {
 				this.successfulMoves++;  // Danger right in field - thiss cell
 				console.log("Successful!");
-			}
+			} else {
+        console.log("Wrong move.");
+      }
 		} else {
-			console.log("Attempted to move in a wrong direction. Was in position " + this.position + ", wanted to move " + direction + "!");
+			//console.log("Attempted to move in a wrong direction. Was in position " + this.position + ", wanted to move " + direction + "!");
 		}
 	}
 
@@ -331,6 +333,7 @@ Animal.prototype.tick = function() {
   report.totalFirings = this.totalNeuralMotorFirings;
   report.nodes = nodes;
   report.edges = edges;
+
   report.totalInputs = totalInputs;
   report.totalDendrites = totalDendrites;
   report.ancestor = this.ancestor;

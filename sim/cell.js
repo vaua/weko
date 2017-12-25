@@ -65,6 +65,7 @@ Cell.prototype.hasProtein = function(protein) {
 Cell.prototype.addIncomingDendrites = function(dendrites) {
   var that = this;
   dendrites.forEach(function (dendrite) {
+    debug("Adding dendrite " + dendrite.id + " to cell " + that.id);
 	   that.incomingDendrites.add(dendrite);
   });
 }
@@ -200,6 +201,11 @@ Cell.prototype.tick = function() {
       debug("I'm an optical cell now!");
       this.cellType = CellTypes.OPTICAL;
     }
+  }
+
+  // Report the protein, if not already done
+  if (this.parentAnimal.proteins === null) {
+    this.parentAnimal.proteins = this.proteins;
   }
 
   // Once done with all actions, reduce all protein concentrations by half

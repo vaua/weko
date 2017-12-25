@@ -22,7 +22,7 @@ Constant.HEALTH_LOSS_WHEN_DANGER = 7;
 //Cell constants
 Constant.AGE_WHEN_CELL_CAN_DIE = 100;
 Constant.RISK_OF_CELL_DEATH_OF_OLD_AGE = 0.02
-Constant.NEURON_FIRING_THRESHOLD = 1;
+Constant.NEURON_FIRING_THRESHOLD = 5;
 
 // Protein range constants
 Constant.PROTEIN_START = 0;

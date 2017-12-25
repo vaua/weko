@@ -74,6 +74,7 @@
         </table>
       </div>
       <div id='mynetwork' style="float: left; width:50%"></div>
+      <div id='proteins' style="float: left; width:50%"></div>
     </div>
   </div>
 	<script src="/socket.io/socket.io.js"></script>
@@ -125,12 +126,14 @@
 
       console.log("Graphing animal " + graphAnimalId);
       graphNetwork(msg.animalReport[graphAnimalId].nodes, msg.animalReport[graphAnimalId].edges);
+      //graphProteins(msg.animalReport[graphAnimalId].proteins);
 
       $('#animalTable tr').on('click', function() {
         graphAnimalId = $(this).find("td:first").text().substring(7);
         $("#animalTable tr").removeClass("highlight");
         $("#Animal" + graphAnimalId).addClass("highlight");
         graphNetwork(msg.animalReport[graphAnimalId].nodes, msg.animalReport[graphAnimalId].edges);
+        //graphProteins(msg.animalReport[graphAnimalId].proteins);
       });
 		});
 		$('form').submit(function() {
@@ -155,6 +158,12 @@
     var network = new vis.Network(container, data, options);
     network.physics.options.enabled = false;
 
+  }
+
+  function graphProteins(items) {
+    var dataset = new vis.DataSet(items);
+    var container = document.getElementById('proteins');
+    var graph2d = new vis.Graph2d(container, dataset);
   }
 	</script>
   </body>
