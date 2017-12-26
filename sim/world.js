@@ -91,13 +91,16 @@ World.prototype.createAnimals = function(numberOfAnimalsToCreate) {
     var type = Math.random();
     var ancestor;
 
-//	dna = [ 103, 38, 33, 58, 5, 57, 66, 84, 54, 15, 69, 69, 95, 36, 20, 75, 92, 74, 59, 25, 64, 35, 43, 14, 88, 63, 76, 1, 92, 95, 22, 25, 88, 55, 95, 32, 10, 24, 83, 69, 5, 99, 69, 84, 33, 85, 7, 46, 60, 93, 13, 38, 65, 67, //103, 13, 36, 68, 58, 39, 78, 20, 85, 100, 19, 102, 57, 14, 80, 72, 41, 36, 4, 81, 22, 103, 56, 104, 104, 38, 86, 46, 56, 55, 69, 93, 19, 59, 96, 41, 32, 11, 106, 43, 11, 9, 8, 11, 64, 38];
-    if ((this.dnaHallOfFame.dna === undefined) || (type < 0.5)) { // do random animal
+    if ((this.dnaHallOfFame.dna === undefined) || (type < Constant.CHANCE_OF_RANDOM_DNA_AT_BIRTH)) { // do random animal
 
       var dnaSize = Math.floor((Math.random() * Constant.DNA_MAX_SIZE) + Constant.DNA_MIN_SIZE);
-      debug("DNA size: " + dnaSize);
-      for (j = 0; j < dnaSize; j++) {
-        dna.push(Math.floor((Math.random() * ALL_PROTEINS_LENGTH) + 1));
+      if (Constant.USE_SPECIAL_DNA) {
+        dna = Constant.specialDna;
+      } else {
+        debug("DNA size: " + dnaSize);
+        for (j = 0; j < dnaSize; j++) {
+          dna.push(Math.floor((Math.random() * ALL_PROTEINS_LENGTH) + 1));
+        }
       }
     } else {
       dna = this.dnaHallOfFame.dna;
@@ -158,9 +161,9 @@ World.prototype.tick = function() {
   // Increase the pointerToView
   this.pointerToView = (this.pointerToView + 1) % Constant.HORIZON;
   this.visualInput = transformLocationsIntoVisualInput(this.visibleLocations);
-
   //debug("Visible localtions: " + this.visibleLocations);
   //debug("Visual input is: " + this.visualInput);
+
 
   this.result.tickNr = this.tickNr;
   this.result.animalNr = this.animals.length;
@@ -170,28 +173,5 @@ World.prototype.tick = function() {
   this.result.left = this.left;
   this.result.right = this.right;
 }
-
-/*
-World.prototype.start = function(minAnimals, ticks) {
-  // Create the world
-  // First the animals
-  debug("Simulation started.");
-
-  if (minAnimals !== undefined) MINIMAL_ANIMAL_NUMBER = minAnimals;
-  if (ticks !== undefined) runForTicks = ticks;
-  // Here, special animals are added.
-  // specialDna = [6, 7, 12, 6, 17, 7, 1, 8, 8, 8, 1, 8, 8, 8 ,8 ,8 ,8 ,8 ,8 ,7, 6];
-  // this.animals.push(new Animal(specialDna, INITIAL_ANIMAL_NUMBER, this));
-
-
-
-  // Enter the eternal loop
-  while(this.tickNr != runForTicks) {
-    this.tick();
-
-  }
-}
-*/
-
 
 module.exports = World;

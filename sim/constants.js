@@ -13,11 +13,17 @@ Constant.DNA_MIN_SIZE = 10;
 Constant.DNA_MAX_SIZE = 400;
 Constant.WORLD_WIDTH = 2;
 Constant.CHANCE_OF_FOOD = 0.3;
-Constant.RISK_OF_DANGER = 0.3;
+Constant.RISK_OF_DANGER = 0.1;
+Constant.CHANCE_OF_RANDOM_DNA_AT_BIRTH = 0.7;
 
 // Animal constants
-Constant.HEALTH_GAIN_WHEN_FOOD = 5;
-Constant.HEALTH_LOSS_WHEN_DANGER = 7;
+Constant.HEALTH_GAIN_WHEN_FOOD = 10;
+Constant.HEALTH_LOSS_WHEN_DANGER = 50;
+Constant.REWARD_PER_SUCCESSFUL_MOVE = 500;
+Constant.REWARD_FOR_MOBILITY = 100;
+Constant.REWARD_THRESHOLD_FOR_AGE = 80;
+Constant.INITIAL_HEALTH = 750;
+Constant.HEALTH_REDUCTION_ON_CELL_BRITH = 1;
 
 //Cell constants
 Constant.AGE_WHEN_CELL_CAN_DIE = 100;
@@ -56,5 +62,12 @@ Constant.BLOCK_ACCEPT_DENDRITES_MULTIPLIER = 10;
 Constant.DEVELOP_MOTOR_CELL_MULTIPLIER = 10;
 Constant.DEVELOP_OPTICAL_CELL_MULTIPLIER = 10;
 Constant.SPAWN_ANIMAL_MULTIPLIER = 2;
+
+Constant.USE_SPECIAL_DNA = false;
+Constant.specialDna = [57, 27, 68, 104, 76, 57, 44, 36, 100, 1, 60, 88, 30, 88,
+   63, 25, 43, 11, 39, 78, 15, 41, 89, 9, 77, 57, 41, 32, 16, 76, 21, 94, 90,
+   90, 26, 41, 93, 16, 61, 57, 91, 91, 61, 3, 56, 102, 41, 32, 4, 19, 103, 71,
+   105, 63, 33, 80, 3, 66, 35, 33, 73, 22, 56, 45, 46, 37, 69, 52, 84, 85, 49,
+   80, 32, 50, 91, 63, 75, 92, 34, 43, 92, 42, 60, 70, 103];
 
 module.exports = Constant;

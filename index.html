@@ -85,14 +85,16 @@
 	$(function () {
 		var socket = io();
 
+      socket.on('disconnect', function(){
+          console.log('Client: user disconnected');
+      });
+
       socket.on('result', function(msg) {
+        console.log('Client: got result');
       $('#animalNr').html(msg.animalNr);
       $('#tickNr').html(msg.tickNr + ", total firings: " + msg.totalFirings + ". Last round took " + (msg.lastTickTime / 1000).toFixed(4) + "[s], per tick: " + msg.lastTickTimePerTick.toFixed(4) + "[ms], per animal " + msg.lastTickTimePerTickPerAnimal.toFixed(4) + "[ms].");
       $('#visual').html(msg.visualInput + "   L/R: " + msg.left + "/" + msg.right);
       $('#animalBody').html("");
-
-
-
 
       Object.keys(msg.animalReport).forEach(function(key,index) {
         var animal = msg.animalReport[key];
@@ -125,20 +127,31 @@
       }
 
       console.log("Graphing animal " + graphAnimalId);
-      graphNetwork(msg.animalReport[graphAnimalId].nodes, msg.animalReport[graphAnimalId].edges);
+      //graphNetwork(msg.animalReport[graphAnimalId].nodes, msg.animalReport[graphAnimalId].edges);
       //graphProteins(msg.animalReport[graphAnimalId].proteins);
 
       $('#animalTable tr').on('click', function() {
         graphAnimalId = $(this).find("td:first").text().substring(7);
         $("#animalTable tr").removeClass("highlight");
         $("#Animal" + graphAnimalId).addClass("highlight");
-        graphNetwork(msg.animalReport[graphAnimalId].nodes, msg.animalReport[graphAnimalId].edges);
+        //graphNetwork(msg.animalReport[graphAnimalId].nodes, msg.animalReport[graphAnimalId].edges);
         //graphProteins(msg.animalReport[graphAnimalId].proteins);
       });
 		});
 		$('form').submit(function() {
 		  var input = {"number" : $('#a').val(), "rounds" : $('#b').val()};
-		  socket.emit('Start', input);
+      var runs;
+      var BATCH_SIZE = 100;
+      for (runs = input.rounds; runs > 0 ; runs -= BATCH_SIZE) {
+        if (runs < BATCH_SIZE) {
+          input.rounds = runs;
+          socket.emit('Start', input);
+        } else {
+          input.rounds = BATCH_SIZE;
+          socket.emit('Start', input);
+        }
+      }
+
 		  return false;
 		});
 	});
@@ -153,7 +166,8 @@
     };
     var options = {
       nodes: {borderWidth: 2},
-      interaction: {hover: true}
+      interaction: {hover: true},
+      layout: {improvedLayout: false}
     }
     var network = new vis.Network(container, data, options);
     network.physics.options.enabled = false;

@@ -167,7 +167,7 @@ Cell.prototype.tick = function() {
       newCellProtein[key] = that.proteins[key];
     });
     this.parentAnimal.createNewCell(this.dna, this.proteins, this.cellType);
-    this.parentAnimal.health -= 1; // Reduce the health upon birth
+    this.parentAnimal.health -= Constant.HEALTH_REDUCTION_ON_CELL_BRITH; // Reduce the health upon birth
   }
 
   //TODO: Some of the checks in here will need to be splitted out for optical, motor cells.

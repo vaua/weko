@@ -29,7 +29,7 @@ function Animal(dna, id, position, world, initialCell, ancestor) {
   this.dangerFacedRight = 0;
   this.motorCellNumber = 0;
   // Initiate the original cell to the original values
-  this.health = 400;
+  this.health = Constant.INITIAL_HEALTH;
   // Create the initial cell
   if (initialCell === undefined) {
 	this.cells.push(new Cell(this.id + "_" + this.cells.length, this, this.dna, {}, 0));
@@ -89,17 +89,20 @@ Animal.prototype.tick = function() {
     this.world.left += this.left;
     this.world.right += this.right;
     // But before, calculate fitness point and see if it was good!
-    var fitness = (this.successfulMoves * 20) +
-                  ((this.moves > 0) * 100) +
+    var fitness = (this.successfulMoves * Constant.REWARD_PER_SUCCESSFUL_MOVE) +
+                  ((this.moves > 0) * Constant.REWARD_FOR_MOBILITY) +
                   ((this.totalNeuralMotorFirings > 0) * this.totalNeuralMotorFirings) +
-                  ((this.age > 80) * (this.age - 80));
+                  ((this.age > Constant.REWARD_THRESHOLD_FOR_AGE) * (this.age - Constant.REWARD_THRESHOLD_FOR_AGE));
     if (fitness > 0) {
       if ((this.world.dnaHallOfFame.dna === undefined) || (fitness > this.world.dnaHallOfFame.fitness)) {
         this.world.dnaHallOfFame.dna = this.dna;
         this.world.dnaHallOfFame.fitness = fitness;
         this.world.dnaHallOfFame.age = this.age;
         this.world.dnaHallOfFame.id = this.id;
-        debug("Switching dna leader to this awesome animal.");
+        console.log("Switching dna leader to this awesome animal " + this.id + " that got " + fitness + " points by having " + this.successfulMoves + " successful moves, " +
+          this.totalNeuralMotorFirings + " neural firings and respectable age of " + this.age + " at death.");
+        //let i; // inportant to be outside
+        //for(i = 0; i < this.dna.length - 1; i++) console.log(this.dna[i] + ",");
       }
     }
 
@@ -247,21 +250,21 @@ Animal.prototype.tick = function() {
 			//console.log("Moved, direction is " + direction + " and visual " + visualInput);
 			if ((visualInput[0] % 2 == 1) && direction < 0) {
 				this.successfulMoves++;   // Food left in field - this cell should be active.
-				console.log("Successful!");
+				debug("Successful!");
 			}
 			else if ((visualInput[0] > 1) && direction > 0) {
 				this.successfulMoves++;  // Danger left in field - thiss cell
-				console.log("Successful!");
+				debug("Successful!");
 			}
 			else if ((visualInput[1] % 2 == 1) && direction > 0) {
 				this.successfulMoves++;  // Food right in field - this cell should be active.
-				console.log("Successful!");
+				debug("Successful!");
 			}
 			else if ((visualInput[1] > 1) && direction < 0) {
 				this.successfulMoves++;  // Danger right in field - thiss cell
-				console.log("Successful!");
+				debug("Successful!");
 			} else {
-        console.log("Wrong move.");
+        debug("Wrong move.");
       }
 		} else {
 			//console.log("Attempted to move in a wrong direction. Was in position " + this.position + ", wanted to move " + direction + "!");

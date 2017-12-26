@@ -37,35 +37,32 @@ var io = require('socket.io')(server);
 
 io.on('connection', function(socket){
   debug("Connecting!");
-  io.emit('Result', 'Now we starting...');
-  socket.broadcast.emit('Result', 'Now we starting...');
   var world = new World();
   var started = false;
+
 
   socket.on('Start', function(msg){
     var start = process.hrtime();
     var rounds = msg.rounds;
-    if (!started) {
-      console.log('Number of animals is: ' + msg.number);
-      console.log('Number of rounds is: ' + msg.rounds);
-      world.minimalAnimalNumber = msg.number;
+    console.log('Number of animals is: ' + msg.number);
+    console.log('Number of rounds is: ' + msg.rounds);
+    world.minimalAnimalNumber = msg.number;
 
-	    io.emit('Result', 'Now we starting...');
-	    //Start the simulation
-	    debug('Starting the simulation.');
-      started = true;
-    }
-    while(msg.rounds-- > 0) world.tick();
+    //Start the simulation
+    debug('Running the simulation.');
+    runSimulation(world, msg.rounds, msg.number, start, socket);    /*
     var end = process.hrtime(start);
     var elapsed = (end[0] * 1000) + (end[1] / 1000000);
     world.result.lastTickTime = elapsed;
     world.result.lastTickTimePerTick = elapsed / rounds;
     world.result.lastTickTimePerTickPerAnimal = world.result.lastTickTimePerTick / msg.number;
-    io.emit('result', world.result);
+    socket.emit('result', world.result);
+    */
   });
+
   socket.on('disconnect', function(){
     console.log('user disconnected');
-    delete world;
+    //delete world;
   });
 });
 
@@ -116,6 +113,22 @@ function onError(error) {
       throw error;
   }
 }
+
+function runSimulation(world, roundsLeft, number, start, socket) {
+  var rounds = roundsLeft;
+  while (roundsLeft-- > 0) world.tick();
+
+  var end = process.hrtime(start);
+  var elapsed = (end[0] * 1000) + (end[1] / 1000000);
+  world.result.lastTickTime = elapsed;
+  world.result.lastTickTimePerTick = elapsed / rounds;
+  world.result.lastTickTimePerTickPerAnimal = world.result.lastTickTimePerTick / number;
+  socket.emit('result', world.result);
+
+  console.log("Ticks left " + roundsLeft);
+  //if (roundsLeft > 0) setTimeout(runSimulation(world, roundsLeft, number, start, socket), 100);
+}
+
 
 /**
  * Event listener for HTTP server "listening" event.
