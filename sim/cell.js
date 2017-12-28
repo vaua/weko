@@ -174,12 +174,20 @@ Cell.prototype.tick = function() {
   if (this.cellType > CellTypes.NONE) {
     if (this.hasProtein(Protein.defs.CONNECT_DENDRITES) && this.cellType != CellTypes.MOTOR) {  // Motor cell has no dendrites - its firing affects the movement
       debug("Connecting dendrites");
-      this.parentAnimal.addCellWithWillingDendrites(this);
+	  if (this.hasProtein(Protein.defs.BLOCK_CONNECT_DENDRITES)) {
+		  console.log("Blocking connecting dendrites.");
+	  } else {
+		this.parentAnimal.addCellWithWillingDendrites(this);
+	  }
     }
 
     if (this.hasProtein(Protein.defs.ACCEPT_DENDRITES) && this.cellType != CellTypes.OPTICAL) { // Optical cells need no incoming dendrites - they are driven by inputs directly
       debug("Accepting dendrites");
-      this.parentAnimal.addCellAcceptingDendrites(this);
+	  if (this.hasProtein(Protein.defs.BLOCK_ACCEPT_DENDRITES)) {
+		  console.log("Blocking accepting dendrites.");
+	  } else {
+		this.parentAnimal.addCellAcceptingDendrites(this);
+	  }
     }
 
     if (this.hasProtein(Protein.defs.DICCONNECT_DENDRITES)) {

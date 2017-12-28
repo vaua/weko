@@ -86,7 +86,7 @@
 		var socket = io();
 		var roundsLeft = 0;
 		var animals = 0;
-		var BATCH_SIZE = 1;
+		var BATCH_SIZE = 100;
 		
       socket.on('disconnect', function(){
           console.log('Client: user disconnected');
@@ -131,14 +131,14 @@
       }
 
       console.log("Graphing animal " + graphAnimalId);
-      //graphNetwork(msg.animalReport[graphAnimalId].nodes, msg.animalReport[graphAnimalId].edges);
+      graphNetwork(msg.animalReport[graphAnimalId].nodes, msg.animalReport[graphAnimalId].edges);
       //graphProteins(msg.animalReport[graphAnimalId].proteins);
 
       $('#animalTable tr').on('click', function() {
         graphAnimalId = $(this).find("td:first").text().substring(7);
         $("#animalTable tr").removeClass("highlight");
         $("#Animal" + graphAnimalId).addClass("highlight");
-        //graphNetwork(msg.animalReport[graphAnimalId].nodes, msg.animalReport[graphAnimalId].edges);
+        graphNetwork(msg.animalReport[graphAnimalId].nodes, msg.animalReport[graphAnimalId].edges);
         //graphProteins(msg.animalReport[graphAnimalId].proteins);
       });
 	  
@@ -183,13 +183,15 @@
 		});
 	});
 	
-	function runBatch() {
-		
-	}
-
   function graphNetwork(nodes, edges) {
-    var nodes = new vis.DataSet(nodes);
-    var edges = new vis.DataSet(edges);
+	var nodes;
+	var edges;
+	try {
+		var nodes = new vis.DataSet(nodes);
+		var edges = new vis.DataSet(edges);
+	} catch (err) {
+		return;
+	}
     var container = document.getElementById('mynetwork');
     var data = {
       nodes: nodes,
