@@ -44,8 +44,8 @@ io.on('connection', function(socket){
   socket.on('Start', function(msg){
     var start = process.hrtime();
     var rounds = msg.rounds;
-    console.log('Number of animals is: ' + msg.number);
-    console.log('Number of rounds is: ' + msg.rounds);
+    debug('Number of animals is: ' + msg.number);
+    debug('Number of rounds is: ' + msg.rounds);
     world.minimalAnimalNumber = msg.number;
 
     //Start the simulation
@@ -125,7 +125,7 @@ function runSimulation(world, roundsLeft, number, start, socket) {
   world.result.lastTickTimePerTickPerAnimal = world.result.lastTickTimePerTick / number;
   socket.emit('result', world.result);
 
-  console.log("Ticks left " + roundsLeft);
+  debug("Ticks left " + roundsLeft);
   //if (roundsLeft > 0) setTimeout(runSimulation(world, roundsLeft, number, start, socket), 100);
 }
 
