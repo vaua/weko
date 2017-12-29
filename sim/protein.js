@@ -4,7 +4,8 @@ var debug = require('debug')('protein');
 // Proteins definitions
 var REDUCTION_START = Constant.PROTEIN_START;
 var DIVISION_START = REDUCTION_START + Constant.REDUCTION_LENGTH;
-var NEURON_START = DIVISION_START + Constant.DIVISION_LENGTH;
+var BLOCK_DIVISION_START = DIVISION_START + Constant.DIVISION_LENGTH;
+var NEURON_START = BLOCK_DIVISION_START + Constant.BLOCK_DIVISION_LENGTH;
 var CONNECT_DENDRITES_START = NEURON_START + Constant.NEURON_LENGTH;
 var DISCONNECT_DENDRITES_START = CONNECT_DENDRITES_START + Constant.CONNECT_DENDRITES_LENGTH;
 var BLOCK_CONNECT_DENDRITES_START = DISCONNECT_DENDRITES_START + Constant.DISCONNECT_DENDRITES_LENGTH;
@@ -23,11 +24,12 @@ ALL_PROTEINS_LENGTH = NO_PROTEIN_START + Constant.NO_PROTEIN_LENGTH;
 
 
 var Proteins = {
-  REDUCES_PROTEINS :        REDUCTION_START,                 // 0, Reduces the number of all proteins to half (but does not affect permanen proteins)
-  START_CELL_DIVISION :     DIVISION_START,                  // 1, If this protein is expressed, the cell will devide itself
-  NEURON :                  NEURON_START,                    // 11, Cell will get an axon that will connect to all at that time receptive axons. Permanent, makes cell neural cell.
-  CONNECT_DENDRITES:        CONNECT_DENDRITES_START,         // 21, Neural cell will connect its axon to currently receptive dendrites
-  DISCONNECT_DENDRITES:     DISCONNECT_DENDRITES_START,      // 26, Neural cell will disconnect X least used dendrites.
+  REDUCES_PROTEINS :        REDUCTION_START,                 // Reduces the number of all proteins to half (but does not affect permanen proteins)
+  START_CELL_DIVISION :     DIVISION_START,                  // If this protein is expressed, the cell will devide itself
+  BLOCK_CELL_DIVISION :     BLOCK_DIVISION_START,			 // Blocks cell division.
+  NEURON :                  NEURON_START,                    // Cell will get an axon that will connect to all at that time receptive axons. Permanent, makes cell neural cell.
+  CONNECT_DENDRITES:        CONNECT_DENDRITES_START,         // Neural cell will connect its axon to currently receptive dendrites
+  DISCONNECT_DENDRITES:     DISCONNECT_DENDRITES_START,      // Neural cell will disconnect X least used dendrites.
   BLOCK_CONNECT_DENDRITES:  BLOCK_CONNECT_DENDRITES_START,   // Blockerar protein that connects dendrites.
   CONNECT_AXON:             CONNECT_AXON_START,              // Neural cell connects to all receptive axons
   BLOCK_CONNECT_AXON:       BLOCK_CONNECT_AXON_START,        // Block cell from connecting to axons
@@ -54,12 +56,15 @@ Protein.expressGene = function(geneExpressed) {
   // Nested if-statements checking which protein has been expressed.
   if (geneExpressed < DIVISION_START) {                     // REDUCTION is expressed.
     proteinChange[Proteins.REDUCES_PROTEINS] = (geneExpressed - REDUCTION_START + 1) * Constant.REDUCTION_MULTIPLIER;
-  } else if (geneExpressed < NEURON_START) {
-    proteinChange[Proteins.START_CELL_DIVISION] = (geneExpressed - DIVISION_START + 1) * Constant.START_CELL_DIVISION_MULTIPLIER;
+  } else if (geneExpressed < BLOCK_DIVISION_START) {
+	proteinChange[Proteins.START_CELL_DIVISION] = (geneExpressed - DIVISION_START + 1) * Constant.START_CELL_DIVISION_MULTIPLIER;
     debug('division, multiplier: ' + (geneExpressed - DIVISION_START + 1));
+  } else if (geneExpressed < NEURON_START) {
+    proteinChange[Proteins.BLOCK_CELL_DIVISION] = (geneExpressed - BLOCK_DIVISION_START + 1) * Constant.BLOCK_CELL_DIVISION_MULTIPLIER;
+    debug('block division, multiplier: ' + (geneExpressed - BLOCK_DIVISION_START + 1));
   } else if (geneExpressed < CONNECT_DENDRITES_START) {
     proteinChange[Proteins.NEURON] = (geneExpressed - NEURON_START + 1) * Constant.NEURON_MULTIPLIER;
-    debug("Neuron, proteint change is " + proteinChange[Proteins.NEURON]);
+    debug("Neuron, protein change is " + proteinChange[Proteins.NEURON]);
   } else if (geneExpressed < DISCONNECT_DENDRITES_START) {
     proteinChange[Proteins.CONNECT_DENDRITES] = (geneExpressed - CONNECT_DENDRITES_START + 1) * Constant.CONNECT_DENDRITES_MULTIPLIER;
     debug("Connect dendrites");

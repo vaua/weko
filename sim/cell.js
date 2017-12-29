@@ -157,17 +157,21 @@ Cell.prototype.tick = function() {
   }
 
   if (this.hasProtein(Protein.defs.START_CELL_DIVISION)) {
-    debug("Creating new cell!");
-    //TODO: Reduce protein mix to half before spawing the cell.
-    reduceProteinMixByHalf(this.proteins);
+    if (this.hasProtein(Protein.defs.BLOCK_CELL_DIVISION)) {
+		debug("Cell division blocked.");
+	} else {
+		debug("Creating new cell!");
+		//TODO: Reduce protein mix to half before spawing the cell.
+		reduceProteinMixByHalf(this.proteins);
 
-    // copy the proteins, TODO: reduce the number
-    var newCellProtein = {};
-    Object.keys(this.proteins).forEach(function(key) {
-      newCellProtein[key] = that.proteins[key];
-    });
-    this.parentAnimal.createNewCell(this.dna, this.proteins, this.cellType);
-    this.parentAnimal.health -= Constant.HEALTH_REDUCTION_ON_CELL_BRITH; // Reduce the health upon birth
+		// copy the proteins, TODO: reduce the number
+		var newCellProtein = {};
+		Object.keys(this.proteins).forEach(function(key) {
+		  newCellProtein[key] = that.proteins[key];
+		});
+		this.parentAnimal.createNewCell(this.dna, this.proteins, this.cellType);
+		this.parentAnimal.health -= Constant.HEALTH_REDUCTION_ON_CELL_BRITH; // Reduce the health upon birth
+	}
   }
 
   //TODO: Some of the checks in here will need to be splitted out for optical, motor cells.
@@ -175,7 +179,7 @@ Cell.prototype.tick = function() {
     if (this.hasProtein(Protein.defs.CONNECT_DENDRITES) && this.cellType != CellTypes.MOTOR) {  // Motor cell has no dendrites - its firing affects the movement
       debug("Connecting dendrites");
 	  if (this.hasProtein(Protein.defs.BLOCK_CONNECT_DENDRITES)) {
-		  console.log("Blocking connecting dendrites.");
+		  debug("Blocking connecting dendrites.");
 	  } else {
 		this.parentAnimal.addCellWithWillingDendrites(this);
 	  }
@@ -184,7 +188,7 @@ Cell.prototype.tick = function() {
     if (this.hasProtein(Protein.defs.ACCEPT_DENDRITES) && this.cellType != CellTypes.OPTICAL) { // Optical cells need no incoming dendrites - they are driven by inputs directly
       debug("Accepting dendrites");
 	  if (this.hasProtein(Protein.defs.BLOCK_ACCEPT_DENDRITES)) {
-		  console.log("Blocking accepting dendrites.");
+		  debug("Blocking accepting dendrites.");
 	  } else {
 		this.parentAnimal.addCellAcceptingDendrites(this);
 	  }
