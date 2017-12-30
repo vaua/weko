@@ -103,9 +103,24 @@ World.prototype.createAnimals = function(numberOfAnimalsToCreate) {
         }
       }
     } else {
-      dna = this.dnaHallOfFame.dna;
       ancestor = this.dnaHallOfFame.id;
       debug("Created copied animal, " + (this.animalId + 1) + " is clone of " + this.dnaHallOfFame.id);
+
+      // apply mutation
+      debug("Duplicating DNA");
+      if (Math.random() < Constant.CHANCE_OF_MUTATION) {
+        this.dnaHallOfFame.dna.forEach(function(gene) {
+          // Check for mutation
+          var copiedGene = gene;
+          if (Math.random() < Constant.RATE_OF_MUTATION_PER_GENE) {
+            debug("Mutation!");
+            copiedGene = Math.floor((Math.random() * ALL_PROTEINS_LENGTH) + 1);
+          }
+          dna.push(copiedGene);
+        });
+      } else {
+        dna = this.dnaHallOfFame.dna;
+      }
     }
     debug("Dna is " + dna);
 
