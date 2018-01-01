@@ -1,220 +1,295 @@
 <!doctype html>
 <html>
-  <head>
+
+<head>
     <title>Weko - world, evolution, ko</title>
     <script type="text/javascript" src="javascripts/vis.js"></script>
     <link href="stylesheets/vis.css" rel="stylesheet" type="text/css" />
     <style>
-      * { margin: 0; padding: 0; box-sizing: border-box; }
-      body { font: 13px Helvetica, Arial; }
-      label {display: inline-block;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font: 13px Helvetica, Arial;
+        }
+
+        label {
+            display: inline-block;
             float: left;
             clear: left;
             width: 150px;
             padding: 10px;
-            text-align: right;}
-      form { background: #aaa; padding: 3px; position: top: 0; width: 100%; }
-      form input { border: 0; position: left: 200; padding: 10px; width: 100px; margin-right: .5%; }
-      form button { width: 9%; background: rgb(0, 224, 255); border: none; padding: 10px; }
-      #messages { list-style-type: none; margin: 0; padding: 0; }
-      #messages li { padding: 5px 10px; }
-      #messages li:nth-child(odd) { background: #eee; }
-      table { border-collapse: collapse; }
-      tr { border-bottom: 1px solid #ccc; }
-      th, td { text-align: left; padding-left: 15px; padding-bottom: 4px}
-      #mynetwork {
-          width: 600px;
-          height: 800px;
-          border: 1px solid lightgray;
-      }
-      .highlight { background-color: red; }
-      .mover { background-color: #E6E6FA; }
-      .connected { background-color: #90EE90; }
-      .firing { background-color: #20B2AA; }
+            text-align: right;
+        }
 
+        form {
+            background: #aaa;
+            padding: 3px;
+            position: top: 0;
+            width: 100%;
+        }
+
+        form input {
+            border: 0;
+            position: left: 200;
+            padding: 10px;
+            width: 100px;
+            margin-right: .5%;
+        }
+
+        form button {
+            width: 9%;
+            background: rgb(0, 224, 255);
+            border: none;
+            padding: 10px;
+        }
+
+        #messages {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        #messages li {
+            padding: 5px 10px;
+        }
+
+        #messages li:nth-child(odd) {
+            background: #eee;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        tr {
+            border-bottom: 1px solid #ccc;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding-left: 15px;
+            padding-bottom: 4px
+        }
+
+        #mynetwork {
+            width: 600px;
+            height: 800px;
+            border: 1px solid lightgray;
+        }
+
+        .highlight {
+            background-color: red;
+        }
+
+        .mover {
+            background-color: #E6E6FA;
+        }
+
+        .connected {
+            background-color: #90EE90;
+        }
+
+        .firing {
+            background-color: #20B2AA;
+        }
     </style>
-  </head>
-  <body>
+</head>
+
+<body>
     <h1>Weko simulation of the free world!</h1>
     <ul id="messages"></ul>
     <form action="">
-      <label>Number of individuals</label> <input id="a" autocomplete="off" value="30" /><br>
-      <label>Amount of rounds</label> <input id="b" autocomplete="off" value="5"/><br>
-      <input type="submit" name="b1" value="Start"/>
-      <input type="submit" name="b1" value="Step"/>
-      <input type="submit" name="b1" value="Reset"/>
+        <label>Number of individuals</label> <input id="a" autocomplete="off" value="30" /><br>
+        <label>Amount of rounds</label> <input id="b" autocomplete="off" value="5" /><br>
+        <input type="submit" name="b1" value="Start" />
+        <input type="submit" name="b1" value="Step" />
+        <input type="submit" name="b1" value="Reset" />
     </form>
     <div id="tables">
-      <div id="leftTable" style="float: left; width:50%">
-        <table id="worldTable">
-          <tr>
-            <th>Item</th>
-            <th>Value</th>
-          </tr>
-          <tr>
-            <td>Number of animals</td>
-            <td id="animalNr"></td>
-          </tr>
-          <tr>
-            <td>Tick of the world</td>
-            <td id="tickNr"></td>
-          </tr>
-          <tr>
-            <td>Visual inputs</td>
-            <td id="visual"></td>
-          </tr>
-        </table>
-        <table id="animalTable">
-          <thead>
-            <th>Item</th>
-            <th>Value</th>
-          </thead>
-          <tbody id="animalBody">
-          </tbody>
-        </table>
-      </div>
-      <div id='mynetwork' style="float: left; width:50%"></div>
-      <div id='proteins' style="float: left; width:50%"></div>
+        <div id="leftTable" style="float: left; width:50%">
+            <table id="worldTable">
+                <tr>
+                    <th>Item</th>
+                    <th>Value</th>
+                </tr>
+                <tr>
+                    <td>Number of animals</td>
+                    <td id="animalNr"></td>
+                </tr>
+                <tr>
+                    <td>Tick of the world</td>
+                    <td id="tickNr"></td>
+                </tr>
+                <tr>
+                    <td>Visual inputs</td>
+                    <td id="visual"></td>
+                </tr>
+            </table>
+            <table id="animalTable">
+                <thead>
+                    <th>Item</th>
+                    <th>Value</th>
+                </thead>
+                <tbody id="animalBody">
+                </tbody>
+            </table>
+        </div>
+        <div id='mynetwork' style="float: left; width:50%"></div>
+        <div id='proteins' style="float: left; width:50%"></div>
     </div>
-  </div>
-	<script src="/socket.io/socket.io.js"></script>
-	<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
-	<script>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+        var graphAnimalId;
+        $(function() {
+            var socket = io();
+            var roundsLeft = 0;
+            var animals = 0;
+            var BATCH_SIZE = 300;
 
-  var graphAnimalId;
-	$(function () {
-		var socket = io();
-		var roundsLeft = 0;
-		var animals = 0;
-		var BATCH_SIZE = 300;
+            socket.on('disconnect', function() {
+                console.log('Client: user disconnected');
+            });
 
-      socket.on('disconnect', function(){
-          console.log('Client: user disconnected');
-      });
+            socket.on('result', function(msg) {
+                console.log('Client: Got result tick ' + msg.tickNr);
+                $('#animalNr').html(msg.animalNr);
+                $('#tickNr').html(msg.tickNr + ", total firings: " + msg.totalFirings + ". Last round took " + (msg.lastTickTime / 1000).toFixed(4) + "[s], per tick: " + msg.lastTickTimePerTick.toFixed(4) + "[ms], per animal " + msg.lastTickTimePerTickPerAnimal.toFixed(4) + "[ms].");
+                $('#visual').html(msg.visualInput + "   L/R: " + msg.left + "/" + msg.right);
+                $('#animalBody').html("");
 
-      socket.on('result', function(msg) {
-        console.log('Client: Got result tick ' + msg.tickNr);
-      $('#animalNr').html(msg.animalNr);
-      $('#tickNr').html(msg.tickNr + ", total firings: " + msg.totalFirings + ". Last round took " + (msg.lastTickTime / 1000).toFixed(4) + "[s], per tick: " + msg.lastTickTimePerTick.toFixed(4) + "[ms], per animal " + msg.lastTickTimePerTickPerAnimal.toFixed(4) + "[ms].");
-      $('#visual').html(msg.visualInput + "   L/R: " + msg.left + "/" + msg.right);
-      $('#animalBody').html("");
+                Object.keys(msg.animalReport).forEach(function(key, index) {
+                    var animal = msg.animalReport[key];
+                    var html = '<tr id="Animal' + key + '"><td>Animal ' + animal.id + '</td><td>Age: ' + animal.age + ' Health: ' + animal.health +
+                        ' Moves: ' + animal.successfulMoves + '/' + animal.realMoves + '/' + animal.moves + 'Dir: ' + animal.left + '/' + animal.right + ' Position: ' + animal.position + ' Cells: ' + animal.cellNr +
+                        ' Optical: ' + animal.opticalCellsActive + '/' + animal.opticalCellNr +
+                        ' Neural: ' + animal.neuralCellsActive + '/' + animal.neuralCellsNr +
+                        ' Motor: ' + animal.motorCellsActive + '/' + animal.motorCellsNr + ' Total firings: ' + animal.totalFirings + ' Dendrites: ' + animal.totalInputs + '/' + animal.totalDendrites + ' ancestor: ' + animal.ancestor + '</td></tr>';
+                    $('#animalBody').append(html);
 
-      Object.keys(msg.animalReport).forEach(function(key,index) {
-        var animal = msg.animalReport[key];
-        var html = '<tr id="Animal' + key + '"><td>Animal ' + animal.id + '</td><td>Age: ' + animal.age + ' Health: ' + animal.health +
-        ' Moves: ' + animal.successfulMoves + '/' + animal.realMoves + '/' + animal.moves + 'Dir: ' + animal.left + '/' + animal.right + ' Position: ' + animal.position + ' Cells: ' + animal.cellNr +
-        ' Optical: ' + animal.opticalCellsActive + '/' + animal.opticalCellNr  +
-        ' Neural: ' + animal.neuralCellsActive + '/' + animal.neuralCellsNr +
-        ' Motor: ' + animal.motorCellsActive + '/' + animal.motorCellsNr + ' Total firings: ' + animal.totalFirings + ' Dendrites: ' + animal.totalInputs + '/' + animal.totalDendrites + ' ancestor: ' + animal.ancestor + '</td></tr>';
-        $('#animalBody').append(html);
+                    // Now, color the rows.
+                    if (animal.totalDendrites > 0) $("#Animal" + key).addClass("connected");
+                    if (animal.totalInputs > 0) $("#Animal" + key).addClass("firing");
+                    if (animal.moves > 0) $("#Animal" + key).addClass("mover");
 
-        // Now, color the rows.
-        if (animal.totalDendrites > 0) $("#Animal" + key).addClass("connected");
-        if (animal.totalInputs > 0) $("#Animal" + key).addClass("firing");
-        if (animal.moves > 0) $("#Animal" + key).addClass("mover");
-
-      });
+                });
 
 
-      // Decide which line should be highlighted as chosen animal
-      if (graphAnimalId === undefined) {
-        graphAnimalId = Object.keys(msg.animalReport)[0];
-        $("#animalTable tr").removeClass("highlight");
-        $("#Animal" + graphAnimalId).addClass("highlight");
-      } else if (jQuery.inArray(graphAnimalId, Object.keys(msg.animalReport)) < 0) {
-          console.log("Animal " + graphAnimalId + " is not present any more!");
-          graphAnimalId = Object.keys(msg.animalReport)[0];
-          $("#animalTable tr").removeClass("highlight");
-          $("#Animal" + graphAnimalId).addClass("highlight");
-      } else {  // now we know that graphAnimalId is not undefined or non existant, highlight it!
-        $("#Animal" + graphAnimalId).addClass("highlight");
-      }
+                // Decide which line should be highlighted as chosen animal
+                if (graphAnimalId === undefined) {
+                    graphAnimalId = Object.keys(msg.animalReport)[0];
+                    $("#animalTable tr").removeClass("highlight");
+                    $("#Animal" + graphAnimalId).addClass("highlight");
+                } else if (jQuery.inArray(graphAnimalId, Object.keys(msg.animalReport)) < 0) {
+                    console.log("Animal " + graphAnimalId + " is not present any more!");
+                    graphAnimalId = Object.keys(msg.animalReport)[0];
+                    $("#animalTable tr").removeClass("highlight");
+                    $("#Animal" + graphAnimalId).addClass("highlight");
+                } else { // now we know that graphAnimalId is not undefined or non existant, highlight it!
+                    $("#Animal" + graphAnimalId).addClass("highlight");
+                }
 
-      console.log("Graphing animal " + graphAnimalId);
-      graphNetwork(msg.animalReport[graphAnimalId].nodes, msg.animalReport[graphAnimalId].edges);
-      //graphProteins(msg.animalReport[graphAnimalId].proteins);
+                console.log("Graphing animal " + graphAnimalId);
+                graphNetwork(msg.animalReport[graphAnimalId].nodes, msg.animalReport[graphAnimalId].edges);
+                //graphProteins(msg.animalReport[graphAnimalId].proteins);
 
-      $('#animalTable tr').on('click', function() {
-        graphAnimalId = $(this).find("td:first").text().substring(7);
-        $("#animalTable tr").removeClass("highlight");
-        $("#Animal" + graphAnimalId).addClass("highlight");
-        graphNetwork(msg.animalReport[graphAnimalId].nodes, msg.animalReport[graphAnimalId].edges);
-        //graphProteins(msg.animalReport[graphAnimalId].proteins);
-      });
+                $('#animalTable tr').on('click', function() {
+                    graphAnimalId = $(this).find("td:first").text().substring(7);
+                    $("#animalTable tr").removeClass("highlight");
+                    $("#Animal" + graphAnimalId).addClass("highlight");
+                    graphNetwork(msg.animalReport[graphAnimalId].nodes, msg.animalReport[graphAnimalId].edges);
+                    //graphProteins(msg.animalReport[graphAnimalId].proteins);
+                });
 
-	  // Schedule next batch
-		if (roundsLeft > 0) {
-		  var input = {};
-		    input.number = animals;
-		    if (roundsLeft > BATCH_SIZE) {
-			  input.rounds = BATCH_SIZE;
-			  roundsLeft -= BATCH_SIZE;
-			  console.log("Sending batch, rounds left: " + roundsLeft);
-			  socket.emit('Start', input);
-			  console.log("Sent batch");
-            } else {
-              input.rounds = roundsLeft;
-		      roundsLeft = 0;
-              socket.emit('Start', input);
+                // Schedule next batch
+                if (roundsLeft > 0) {
+                    var input = {};
+                    input.number = animals;
+                    if (roundsLeft > BATCH_SIZE) {
+                        input.rounds = BATCH_SIZE;
+                        roundsLeft -= BATCH_SIZE;
+                        console.log("Sending batch, rounds left: " + roundsLeft);
+                        socket.emit('Start', input);
+                        console.log("Sent batch");
+                    } else {
+                        input.rounds = roundsLeft;
+                        roundsLeft = 0;
+                        socket.emit('Start', input);
+                    }
+                }
+
+            });
+            $('form').submit(function() {
+                var input = {
+                    "number": $('#a').val(),
+                    "rounds": $('#b').val()
+                };
+                roundsLeft = input.rounds;
+                animals = input.number;
+
+                // run a first batch
+                var input = {};
+                input.number = animals;
+                if (roundsLeft > BATCH_SIZE) {
+                    input.rounds = BATCH_SIZE;
+                    roundsLeft -= BATCH_SIZE;
+                    console.log("Sending batch, rounds left: " + roundsLeft);
+                    socket.emit('Start', input);
+                } else {
+                    input.rounds = roundsLeft;
+                    roundsLeft = 0;
+                    socket.emit('Start', input);
+                }
+
+                return false;
+            });
+        });
+
+        function graphNetwork(nodes, edges) {
+            var nodes;
+            var edges;
+            try {
+                var nodes = new vis.DataSet(nodes);
+                var edges = new vis.DataSet(edges);
+            } catch (err) {
+                console.log("Error: " + err);
+                console.log(nodes);
+                console.log(edges);
+                return;
             }
-		}
+            var container = document.getElementById('mynetwork');
+            var data = {
+                nodes: nodes,
+                edges: edges
+            };
+            var options = {
+                nodes: {
+                    borderWidth: 2
+                },
+                interaction: {
+                    hover: true
+                },
+                layout: {
+                    improvedLayout: false
+                }
+            }
+            var network = new vis.Network(container, data, options);
+            network.physics.options.enabled = false;
 
-	});
-		$('form').submit(function() {
-		  var input = {"number" : $('#a').val(), "rounds" : $('#b').val()};
-          roundsLeft = input.rounds;
-		  animals = input.number;
+        }
 
-	      // run a first batch
-	      var input = {};
-		  input.number = animals;
-		  if (roundsLeft > BATCH_SIZE) {
-			input.rounds = BATCH_SIZE;
-			roundsLeft -= BATCH_SIZE;
-			console.log("Sending batch, rounds left: " + roundsLeft);
-			socket.emit('Start', input);
-          } else {
-            input.rounds = roundsLeft;
-		    roundsLeft = 0;
-            socket.emit('Start', input);
-          }
+        function graphProteins(items) {
+            var dataset = new vis.DataSet(items);
+            var container = document.getElementById('proteins');
+            var graph2d = new vis.Graph2d(container, dataset);
+        }
+    </script>
+</body>
 
-		  return false;
-		});
-	});
-
-  function graphNetwork(nodes, edges) {
-	var nodes;
-	var edges;
-	try {
-		var nodes = new vis.DataSet(nodes);
-		var edges = new vis.DataSet(edges);
-	} catch (err) {
-    console.log("Error: " + err);
-    console.log(nodes);
-    console.log(edges);
-		return;
-	}
-    var container = document.getElementById('mynetwork');
-    var data = {
-      nodes: nodes,
-      edges: edges
-    };
-    var options = {
-      nodes: {borderWidth: 2},
-      interaction: {hover: true},
-      layout: {improvedLayout: false}
-    }
-    var network = new vis.Network(container, data, options);
-    network.physics.options.enabled = false;
-
-  }
-
-  function graphProteins(items) {
-    var dataset = new vis.DataSet(items);
-    var container = document.getElementById('proteins');
-    var graph2d = new vis.Graph2d(container, dataset);
-  }
-	</script>
-  </body>
 </html>

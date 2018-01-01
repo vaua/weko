@@ -2,20 +2,20 @@
 var debug = require('debug')('constants');
 
 
-var Constant = function () {
-  // holder for static variables
+var Constant = function() {
+    // holder for static variables
 }
 
 // World constants
 Constant.RUN_FOR_TICKS = 130;
 Constant.HORIZON = 3;
-Constant.DNA_MIN_SIZE = 10;
-Constant.DNA_MAX_SIZE = 50;
+Constant.DNA_MIN_SIZE = 5;
+Constant.DNA_MAX_SIZE = 25;
 Constant.WORLD_WIDTH = 2;
 Constant.CHANCE_OF_FOOD = 0.3;
 Constant.RISK_OF_DANGER = 0.1;
 Constant.CHANCE_OF_RANDOM_DNA_AT_BIRTH = 0.4;
-Constant.HALL_OF_FAME_SIZE = 10;
+Constant.HALL_OF_FAME_SIZE = 5;
 
 // Animal constants
 Constant.HEALTH_GAIN_WHEN_FOOD = 10;
@@ -23,7 +23,7 @@ Constant.HEALTH_LOSS_WHEN_DANGER = 50;
 Constant.REWARD_PER_SUCCESSFUL_MOVE = 2500;
 Constant.REWARD_FOR_MOBILITY = 100;
 Constant.REWARD_THRESHOLD_FOR_AGE = 80;
-Constant.INITIAL_HEALTH = 750;
+Constant.INITIAL_HEALTH = 350;
 Constant.HEALTH_REDUCTION_ON_CELL_BRITH = 1;
 
 Constant.CHANCE_OF_MUTATION = 0.8;
@@ -31,7 +31,7 @@ Constant.RATE_OF_MUTATION_PER_GENE = 0.05;
 Constant.SIZE_OF_MUTATION = 0.25;
 
 //Cell constants
-Constant.AGE_WHEN_CELL_CAN_DIE = 100;
+Constant.AGE_WHEN_CELL_CAN_DIE = 500;
 Constant.RISK_OF_CELL_DEATH_OF_OLD_AGE = 0.02
 Constant.NEURON_FIRING_THRESHOLD = 5;
 
