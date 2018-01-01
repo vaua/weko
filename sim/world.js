@@ -15,7 +15,7 @@ function World() {
   this.totalFirings = 0;
   this.left = 0;
   this.right = 0;
-  this.dnaHallOfFame = {}; // Currenly object, animal id, age, acquiered points and DNA
+  this.dnaHallOfFame = []; // Currenly object, animal id, age, acquiered points and DNA
 
 
   //Comment - how to do DNA for new animals
@@ -91,7 +91,7 @@ World.prototype.createAnimals = function(numberOfAnimalsToCreate) {
     var type = Math.random();
     var ancestor;
 
-    if ((this.dnaHallOfFame.dna === undefined) || (type < Constant.CHANCE_OF_RANDOM_DNA_AT_BIRTH)) { // do random animal
+    if ((this.dnaHallOfFame[0] === undefined) || (type < Constant.CHANCE_OF_RANDOM_DNA_AT_BIRTH)) { // do random animal
 
       var dnaSize = Math.floor((Math.random() * Constant.DNA_MAX_SIZE) + Constant.DNA_MIN_SIZE);
       if (Constant.USE_SPECIAL_DNA) {
@@ -103,13 +103,19 @@ World.prototype.createAnimals = function(numberOfAnimalsToCreate) {
         }
       }
     } else {
-      ancestor = this.dnaHallOfFame.id;
-      debug("Created copied animal, " + (this.animalId + 1) + " is clone of " + this.dnaHallOfFame.id);
+      // Pick which animal from hall of fame to createAnimal
+
+      var ancestorId = Math.floor(Math.random() * Constant.HALL_OF_FAME_SIZE);
+      while(this.dnaHallOfFame[ancestorId] === undefined) {
+        ancestorId = Math.floor(Math.random() * Constant.HALL_OF_FAME_SIZE);
+      }
+      ancestor = this.dnaHallOfFame[ancestorId];
+      debug("Created copied animal, " + (this.animalId + 1) + " is clone of " + this.dnaHallOfFame[ancestorId].id);
 
       // apply mutation
       debug("Duplicating DNA");
       if (Math.random() < Constant.CHANCE_OF_MUTATION) {
-        this.dnaHallOfFame.dna.forEach(function(gene) {
+        this.dnaHallOfFame[ancestorId].dna.forEach(function(gene) {
           // Check for mutation
           var copiedGene = gene;
           if (Math.random() < Constant.RATE_OF_MUTATION_PER_GENE) {
@@ -119,7 +125,7 @@ World.prototype.createAnimals = function(numberOfAnimalsToCreate) {
           dna.push(copiedGene);
         });
       } else {
-        dna = this.dnaHallOfFame.dna;
+        dna = this.dnaHallOfFame[ancestorId].dna;
       }
     }
     debug("Dna is " + dna);

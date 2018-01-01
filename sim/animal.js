@@ -28,14 +28,15 @@ function Animal(dna, id, position, world, initialCell, ancestor) {
   this.foodEatenRight = 0;
   this.dangerFacedRight = 0;
   this.motorCellNumber = 0;
+  this.nextCellNumber = 0;
   // Initiate the original cell to the original values
   this.health = Constant.INITIAL_HEALTH;
   // Create the initial cell
   if (initialCell === undefined) {
-	this.cells.push(new Cell(this.id + "_" + this.cells.length, this, this.dna, {}, 0));
+	  this.cells.push(new Cell(this.id + "_" + this.nextCellNumber++, this, this.dna, {}, 0));
   } else {
-	initialCell.id = this.id + "_" + this.cells.length;
-	initialCell.parent = this;
+	  initialCell.id = this.id + "_" + this.this.nextCellNumber++;
+	  initialCell.parent = this;
 	if (initialCell.cellType == CellTypes.NEURON) {
 		this.neuralCells.push(initialCell);
 	} else if (initialCell.cellType == CellTypes.OPTICAL) {
@@ -94,17 +95,52 @@ Animal.prototype.tick = function() {
                   ((this.totalNeuralMotorFirings > 0) * this.totalNeuralMotorFirings) +
                   ((this.age > Constant.REWARD_THRESHOLD_FOR_AGE) * (this.age - Constant.REWARD_THRESHOLD_FOR_AGE));
     if (fitness > 0) {
-      if ((this.world.dnaHallOfFame.dna === undefined) || (fitness > this.world.dnaHallOfFame.fitness)) {
+      // Loop over the hall of fame, insert at correct position.
+      var it;
+      for (it = 0; it < Constant.HALL_OF_FAME_SIZE; it++) {
+
+        if (this.world.dnaHallOfFame[it] === undefined || fitness > this.world.dnaHallOfFame[it].fitness) {
+          // if (this.dna === this.world.dnaHallOfFame[it].dna) {
+          //   console.log("Found animal with same DNA, bailing...");
+          //   break;
+          // }
+          var animalRecord = {};
+          animalRecord.dna = this.dna;
+          animalRecord.fitness = fitness;
+          animalRecord.age = this.age;
+          animalRecord.id = this.id;
+          this.world.dnaHallOfFame.splice(it, 0, animalRecord);
+          this.world.dnaHallOfFame.splice(Constant.HALL_OF_FAME_SIZE, 1);
+
+          console.log("Added to leaderboard this awesome animal " + this.id + " that got " + fitness + " points by having " + this.successfulMoves + " successful moves, " +
+            this.totalNeuralMotorFirings + " neural firings and respectable age of " + this.age + " at death.");
+
+          console.log(this.world.dnaHallOfFame);
+          console.log(this.world.dnaHallOfFame[0]);
+          console.log("Leader board:");
+          for (it = 0; it < Constant.HALL_OF_FAME_SIZE; it++) {
+            if (this.world.dnaHallOfFame[it] !== undefined) {
+              console.log("Pos " + it + " id: " + this.world.dnaHallOfFame[it].id +
+              ", fitness: " + this.world.dnaHallOfFame[it].fitness + ", age: " + this.world.dnaHallOfFame[it].age);
+            }
+          }
+          break;
+        }
+      }
+/*
+      if ((this.world.dnaHallOfFame[Constants.HALL_OF_FAME_SIZE - 1] === undefined) ||
+      (fitness > this.world.dnaHallOfFame[Constants.HALL_OF_FAME_SIZE - 1].fitness)) {
         this.world.dnaHallOfFame.dna = this.dna;
         this.world.dnaHallOfFame.fitness = fitness;
         this.world.dnaHallOfFame.age = this.age;
         this.world.dnaHallOfFame.id = this.id;
-        console.log("Switching dna leader to this awesome animal " + this.id + " that got " + fitness + " points by having " + this.successfulMoves + " successful moves, " +
-          this.totalNeuralMotorFirings + " neural firings and respectable age of " + this.age + " at death.");
+
         //let i; // inportant to be outside
         //for(i = 0; i < this.dna.length - 1; i++) console.log(this.dna[i] + ",");
       }
+    */
     }
+
 
     var index = this.world.animals.indexOf(this);
     if (index > -1) {
@@ -142,6 +178,7 @@ Animal.prototype.tick = function() {
     cell_description.id = cell.id;
     cell_description.label = cell.id;
     cell_description.color = "yellow";
+    //console.log("Pushing optical cell: " + cell.id);
     nodes.push(cell_description);
     // There are four options in the world - every forth optical cell react to specific thing.
     var rest = opticalCellNumber % 4;
@@ -162,6 +199,7 @@ Animal.prototype.tick = function() {
     cell_description.id = cell.id;
     cell_description.label = cell.id;
     cell_description.color = "blue";
+    //console.log("Pushing neural cell: " + cell.id);
     nodes.push(cell_description);
 
     var sumOfInputs = 0;
@@ -186,6 +224,7 @@ Animal.prototype.tick = function() {
 
 	/* Now calculate the motor cells and move the animal */
 	var direction = 0;
+  //console.log(this.motorCells);
 
 	this.motorCells.forEach(function(cell){
 		// Add cell to the nodes
@@ -193,6 +232,7 @@ Animal.prototype.tick = function() {
 		cell_description.id = cell.id;
 		cell_description.label = cell.id;
 		cell_description.color = "green";
+    //console.log("Pushing motor cell: " + cell.id);
 		nodes.push(cell_description);
 
 		// Check incoming connections
@@ -354,8 +394,8 @@ Animal.prototype.tick = function() {
 Animal.prototype.createNewCell = function(dna, proteins, cellType) {
   // Instead of adding cells immediately, we'll mark the ones that want to spawn and
   // add them to the animal in the end.
-  var newCellName = this.id + "_" + (this.cells.length + this.newCells.length);
-  //debug("Adding a new cell with id " + newCellName + " to the animal.");
+  var newCellName = this.id + "_" + this.nextCellNumber++;
+  //console.log("Adding a new cell with id " + newCellName + " to the animal, current cells: " + this.cells.length + " new cells: " + this.newCells.length + ".");
   this.newCells.push(new Cell(newCellName, this, dna, proteins, cellType));
 }
 

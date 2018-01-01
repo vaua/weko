@@ -86,8 +86,8 @@
 		var socket = io();
 		var roundsLeft = 0;
 		var animals = 0;
-		var BATCH_SIZE = 100;
-		
+		var BATCH_SIZE = 300;
+
       socket.on('disconnect', function(){
           console.log('Client: user disconnected');
       });
@@ -112,7 +112,7 @@
         if (animal.totalDendrites > 0) $("#Animal" + key).addClass("connected");
         if (animal.totalInputs > 0) $("#Animal" + key).addClass("firing");
         if (animal.moves > 0) $("#Animal" + key).addClass("mover");
-		
+
       });
 
 
@@ -141,7 +141,7 @@
         graphNetwork(msg.animalReport[graphAnimalId].nodes, msg.animalReport[graphAnimalId].edges);
         //graphProteins(msg.animalReport[graphAnimalId].proteins);
       });
-	  
+
 	  // Schedule next batch
 		if (roundsLeft > 0) {
 		  var input = {};
@@ -158,13 +158,13 @@
               socket.emit('Start', input);
             }
 		}
-	  
+
 	});
 		$('form').submit(function() {
 		  var input = {"number" : $('#a').val(), "rounds" : $('#b').val()};
           roundsLeft = input.rounds;
-		  animals = input.number; 
-          
+		  animals = input.number;
+
 	      // run a first batch
 	      var input = {};
 		  input.number = animals;
@@ -182,7 +182,7 @@
 		  return false;
 		});
 	});
-	
+
   function graphNetwork(nodes, edges) {
 	var nodes;
 	var edges;
@@ -190,6 +190,9 @@
 		var nodes = new vis.DataSet(nodes);
 		var edges = new vis.DataSet(edges);
 	} catch (err) {
+    console.log("Error: " + err);
+    console.log(nodes);
+    console.log(edges);
 		return;
 	}
     var container = document.getElementById('mynetwork');

@@ -29,7 +29,7 @@ function Cell(id, parent, dna, proteins, cellType) {
   this.cellType = cellType;
   this.active = false;
   this.incomingDendrites = new Set();
-  debug("New cell is born with name: " + this.id + " and cell type " + this.cellType);
+  //console.log("New cell is born with name: " + this.id + " and cell type " + this.cellType);
 
   // Handle neural cells
   if (this.cellType > 0) {  // TODO: Fix this ugly shortcut comparison to proper cell type check
