@@ -94,16 +94,24 @@ Animal.prototype.tick = function() {
                   ((this.moves > 0) * Constant.REWARD_FOR_MOBILITY) +
                   ((this.totalNeuralMotorFirings > 0) * this.totalNeuralMotorFirings) +
                   ((this.age > Constant.REWARD_THRESHOLD_FOR_AGE) * (this.age - Constant.REWARD_THRESHOLD_FOR_AGE));
+
     if (fitness > 0) {
-      // Loop over the hall of fame, insert at correct position.
+      // Loop over the hall of fame, if high enough insert at correct position.
       var it;
       for (it = 0; it < Constant.HALL_OF_FAME_SIZE; it++) {
+          if (this.world.dnaHallOfFame[it] !== undefined) {
+            if (this.dna[0] === this.world.dnaHallOfFame[it].dna[0]) {
+              if (fitness > this.world.dnaHallOfFame[it].fitness) {
+                console.log("Found animal starting with the same DNA, remove the old one before adding the new one.");
+                this.world.dnaHallOfFame.splice(it, 1);
+              } else {
+                console.log("Found one that is same but lower, bailing.");
+                break;
+              }
+            } else if (fitness < this.world.dnaHallOfFame[it].fitness) continue;
+          }
 
-        if (this.world.dnaHallOfFame[it] === undefined || fitness > this.world.dnaHallOfFame[it].fitness) {
-          // if (this.dna === this.world.dnaHallOfFame[it].dna) {
-          //   console.log("Found animal with same DNA, bailing...");
-          //   break;
-          // }
+
           var animalRecord = {};
           animalRecord.dna = this.dna;
           animalRecord.fitness = fitness;
@@ -115,31 +123,18 @@ Animal.prototype.tick = function() {
           console.log("Added to leaderboard this awesome animal " + this.id + " that got " + fitness + " points by having " + this.successfulMoves + " successful moves, " +
             this.totalNeuralMotorFirings + " neural firings and respectable age of " + this.age + " at death.");
 
-          console.log(this.world.dnaHallOfFame);
-          console.log(this.world.dnaHallOfFame[0]);
           console.log("Leader board:");
           for (it = 0; it < Constant.HALL_OF_FAME_SIZE; it++) {
             if (this.world.dnaHallOfFame[it] !== undefined) {
               console.log("Pos " + it + " id: " + this.world.dnaHallOfFame[it].id +
-              ", fitness: " + this.world.dnaHallOfFame[it].fitness + ", age: " + this.world.dnaHallOfFame[it].age);
+              ", fitness: " + this.world.dnaHallOfFame[it].fitness + ", age: " + this.world.dnaHallOfFame[it].age + ", dna: " + this.world.dnaHallOfFame[it].dna);
             }
           }
           break;
-        }
-      }
-/*
-      if ((this.world.dnaHallOfFame[Constants.HALL_OF_FAME_SIZE - 1] === undefined) ||
-      (fitness > this.world.dnaHallOfFame[Constants.HALL_OF_FAME_SIZE - 1].fitness)) {
-        this.world.dnaHallOfFame.dna = this.dna;
-        this.world.dnaHallOfFame.fitness = fitness;
-        this.world.dnaHallOfFame.age = this.age;
-        this.world.dnaHallOfFame.id = this.id;
 
-        //let i; // inportant to be outside
-        //for(i = 0; i < this.dna.length - 1; i++) console.log(this.dna[i] + ",");
       }
-    */
     }
+
 
 
     var index = this.world.animals.indexOf(this);

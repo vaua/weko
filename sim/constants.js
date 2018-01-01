@@ -15,7 +15,7 @@ Constant.WORLD_WIDTH = 2;
 Constant.CHANCE_OF_FOOD = 0.3;
 Constant.RISK_OF_DANGER = 0.1;
 Constant.CHANCE_OF_RANDOM_DNA_AT_BIRTH = 0.4;
-Constant.HALL_OF_FAME_SIZE = 5;
+Constant.HALL_OF_FAME_SIZE = 10;
 
 // Animal constants
 Constant.HEALTH_GAIN_WHEN_FOOD = 10;
@@ -26,8 +26,8 @@ Constant.REWARD_THRESHOLD_FOR_AGE = 80;
 Constant.INITIAL_HEALTH = 750;
 Constant.HEALTH_REDUCTION_ON_CELL_BRITH = 1;
 
-Constant.CHANCE_OF_MUTATION = 0.5;
-Constant.RATE_OF_MUTATION_PER_GENE = 0.01;
+Constant.CHANCE_OF_MUTATION = 0.8;
+Constant.RATE_OF_MUTATION_PER_GENE = 0.05;
 Constant.SIZE_OF_MUTATION = 0.25;
 
 //Cell constants
@@ -70,7 +70,7 @@ Constant.DEVELOP_MOTOR_CELL_MULTIPLIER = 10;
 Constant.DEVELOP_OPTICAL_CELL_MULTIPLIER = 10;
 Constant.SPAWN_ANIMAL_MULTIPLIER = 2;
 
-Constant.USE_SPECIAL_DNA = true;
+Constant.USE_SPECIAL_DNA = false;
 Constant.specialDna = [80, 89, 66, 32, 51, 33, 67, 8, 34, 67, 66, 25, 111, 85, 86, 13, 90];
 /*Constant.specialDna = [57, 27, 68, 104, 76, 57, 44, 36, 100, 1, 60, 88, 30, 88,
    63, 25, 43, 11, 39, 78, 15, 41, 89, 9, 77, 57, 41, 32, 16, 76, 21, 94, 90,
