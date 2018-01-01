@@ -102,10 +102,10 @@ Animal.prototype.tick = function() {
           if (this.world.dnaHallOfFame[it] !== undefined) {
             if (this.dna[0] === this.world.dnaHallOfFame[it].dna[0]) {
               if (fitness > this.world.dnaHallOfFame[it].fitness) {
-                console.log("Found animal starting with the same DNA, remove the old one before adding the new one.");
+                debug("Found animal starting with the same DNA, remove the old one before adding the new one.");
                 this.world.dnaHallOfFame.splice(it, 1);
               } else {
-                console.log("Found one that is same but lower, bailing.");
+                debug("Found one that is same but lower, bailing.");
                 break;
               }
             } else if (fitness < this.world.dnaHallOfFame[it].fitness) continue;
