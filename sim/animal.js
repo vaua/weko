@@ -33,7 +33,7 @@ function Animal(dna, id, position, world, initialCell, ancestor) {
     this.health = Constant.INITIAL_HEALTH;
     // Create the initial cell
     if (initialCell === undefined) {
-        this.cells.push(new Cell(this.id + "_" + this.nextCellNumber++, this, this.dna, {}, 0));
+        this.cells.push(new Cell(this.id + "_" + this.nextCellNumber++, this, this.dna, {}, 0, 0));
     } else {
         initialCell.id = this.id + "_" + this.this.nextCellNumber++;
         initialCell.parent = this;
@@ -358,7 +358,6 @@ Animal.prototype.tick = function() {
     report.opticalCellNr = this.opticalCells.length;
     report.neuralCellsNr = this.neuralCells.length;
     report.motorCellsNr = this.motorCells.length;
-    //console.log(activeOpticalCells + ", " + activeNeuralCells + ", " + activeMotorCells);
     report.opticalCellsActive = activeOpticalCells;
     report.neuralCellsActive = activeNeuralCells;
     report.motorCellsActive = activeMotorCells;
@@ -386,16 +385,16 @@ Animal.prototype.tick = function() {
     debug("Finishing the animal that has " + this.neuralCells.length + " neural cells, " + this.opticalCells.length + " optical cells and " + this.motorCells.length + " motor cells.");
 }
 
-Animal.prototype.createNewCell = function(dna, proteins, cellType) {
+Animal.prototype.createNewCell = function(dna, proteins, cellType, dnaPositionToStart) {
     // Instead of adding cells immediately, we'll mark the ones that want to spawn and
     // add them to the animal in the end.
     var newCellName = this.id + "_" + this.nextCellNumber++;
     //console.log("Adding a new cell with id " + newCellName + " to the animal, current cells: " + this.cells.length + " new cells: " + this.newCells.length + ".");
-    this.newCells.push(new Cell(newCellName, this, dna, proteins, cellType));
+    this.newCells.push(new Cell(newCellName, this, dna, proteins, cellType, dnaPositionToStart));
 }
 
 Animal.prototype.spawnNewAnimal = function(dna, proteins, cellType) {
-    this.world.createAnimal(new Cell("newbie", this, dna, proteins, cellType), this.position);
+    this.world.createAnimal(new Cell("newbie", this, dna, proteins, cellType, 0), this.position);
 }
 
 Animal.prototype.addForRemoval = function(cell) {

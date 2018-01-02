@@ -2,14 +2,6 @@ var Protein = require("./protein.js");
 var Constant = require('./constants.js');
 var debug = require('debug')('cell');
 
-var id;
-var dna;
-var parentAnimal;
-var markedForDeath;
-var proteins = {};
-var cellAge;
-var cellType;
-var active;
 
 CellTypes = {
     NONE: 0,
@@ -18,14 +10,14 @@ CellTypes = {
     OPTICAL: 3
 }
 
-function Cell(id, parent, dna, proteins, cellType) {
+function Cell(id, parent, dna, proteins, cellType, positionInDna) {
     this.cellAge = 0;
     this.id = id;
     this.dna = dna;
     this.markedForDeath = false;
     this.proteins = proteins; // this is the protein map - needs to be halved for the more realistic scenario.
     this.parentAnimal = parent;
-    this.positionInDna = 0;
+    this.positionInDna = positionInDna;
     this.cellType = cellType;
     this.active = false;
     this.incomingDendrites = new Set();
@@ -159,6 +151,11 @@ Cell.prototype.tick = function() {
             debug("Cell division blocked.");
         } else {
             debug("Creating new cell!");
+			var divNumber = this.proteins[Protein.defs.START_CELL_DIVISION];
+			var dnaPositionToStart = Math.floor((this.dna.length / Constant.DIVISION_LENGTH) * divNumber);
+			//console.log("Concentration of division is " + divNumber + ", DNA length is " + this.dna.length + " yielded start number " + dnaPositionToStart);
+
+			
             //TODO: Reduce protein mix to half before spawing the cell.
             reduceProteinMixByHalf(this.proteins);
 
@@ -167,7 +164,7 @@ Cell.prototype.tick = function() {
             Object.keys(this.proteins).forEach(function(key) {
                 newCellProtein[key] = that.proteins[key];
             });
-            this.parentAnimal.createNewCell(this.dna, this.proteins, this.cellType);
+            this.parentAnimal.createNewCell(this.dna, this.proteins, this.cellType, dnaPositionToStart);
             this.parentAnimal.health -= Constant.HEALTH_REDUCTION_ON_CELL_BRITH; // Reduce the health upon birth
         }
     }
