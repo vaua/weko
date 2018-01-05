@@ -155,7 +155,7 @@ Cell.prototype.tick = function() {
 			var dnaPositionToStart = Math.floor((this.dna.length / Constant.DIVISION_LENGTH) * divNumber);
 			//console.log("Concentration of division is " + divNumber + ", DNA length is " + this.dna.length + " yielded start number " + dnaPositionToStart);
 
-			
+
             //TODO: Reduce protein mix to half before spawing the cell.
             reduceProteinMixByHalf(this.proteins);
 
@@ -189,7 +189,7 @@ Cell.prototype.tick = function() {
             }
         }
 
-        if (this.hasProtein(Protein.defs.DICCONNECT_DENDRITES)) {
+        if (this.hasProtein(Protein.defs.DISCONNECT_DENDRITES)) {
             debug("Disconnecting dendrites");
             //TODO: Implement
         }

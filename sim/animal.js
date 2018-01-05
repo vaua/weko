@@ -100,15 +100,29 @@ Animal.prototype.tick = function() {
             var it;
             for (it = 0; it < Constant.HALL_OF_FAME_SIZE; it++) {
                 if (this.world.dnaHallOfFame[it] !== undefined) {
-                    if (this.dna[0] === this.world.dnaHallOfFame[it].dna[0]) {
-                        if (fitness > this.world.dnaHallOfFame[it].fitness) {
-                            debug("Found animal starting with the same DNA, remove the old one before adding the new one.");
-                            this.world.dnaHallOfFame.splice(it, 1);
-                        } else {
-                            debug("Found one that is same but lower, bailing.");
-                            break;
-                        }
+                    //if (((this.dna[0] === this.world.dnaHallOfFame[it].dna[0]) || (this.dna[1] === this.world.dnaHallOfFame[it].dna[1])))
+                      if (this.dna.length === this.world.dnaHallOfFame[it].dna.length) {
+                          if (fitness > this.world.dnaHallOfFame[it].fitness) {
+                              debug("Found animal starting with the same DNA, remove the old one before adding the new one.");
+                              this.world.dnaHallOfFame.splice(it, 1);
+                          } else {
+                              debug("Found one that is same but lower, bailing.");
+                              break;
+                          }
                     } else if (fitness < this.world.dnaHallOfFame[it].fitness) continue;
+                    else {
+                        // Remove any remaining entries in the HALL_OF_FAME
+                        var it2;
+                        for (it2 = it; it2 < Constant.HALL_OF_FAME_SIZE; it2++) {
+                            if (this.world.dnaHallOfFame[it2] !== undefined) {
+                                if (this.dna.length === this.world.dnaHallOfFame[it2].dna.length) {
+                                    // Found the one that is the same, splice it
+                                    this.world.dnaHallOfFame.splice(it2, 1);
+                                    it2--;
+                                }
+                            }
+                        }
+                    }
                 }
 
 
