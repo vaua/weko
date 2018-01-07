@@ -17,7 +17,9 @@ var BLOCK_ACCEPT_DENDRITES_START = ACCEPT_DENDRITES_START + Constant.ACCEPT_DEND
 var MOTOR_CELL_START = BLOCK_ACCEPT_DENDRITES_START + Constant.BLOCK_ACCEPT_DENDRITES_LENGTH;
 var OPTICAL_CELL_START = MOTOR_CELL_START + Constant.MOTOR_CELL_LENGTH;
 var SPAWN_ANIMAL_START = OPTICAL_CELL_START + Constant.OPTICAL_CELL_LENGTH;
-var NO_PROTEIN_START = SPAWN_ANIMAL_START + Constant.SPAWN_ANIMAL_LENGTH;
+var DO_NOTHING_START = SPAWN_ANIMAL_START + Constant.SPAWN_ANIMAL_LENGTH;
+var KILL_SELF_START = DO_NOTHING_START + Constant.DO_NOTHING_LENGTH;
+var NO_PROTEIN_START = KILL_SELF_START + Constant.KILL_SELF_LENGTH;
 
 ALL_PROTEINS_LENGTH = NO_PROTEIN_START + Constant.NO_PROTEIN_LENGTH;
 
@@ -37,7 +39,9 @@ var Proteins = {
     BLOCK_ACCEPT_DENDRITES: BLOCK_ACCEPT_DENDRITES_START, // Blocks acceptance for dendrites
     DEVELOP_MOTOR_CELL: MOTOR_CELL_START, // Upon new cell division, this cell becomes motor cell
     DEVELOP_OPTICAL_CELL: OPTICAL_CELL_START, // Upon cell division, the daughter cell becomes optical cell.
-    SPAWN_ANIMAL: SPAWN_ANIMAL_START
+    SPAWN_ANIMAL: SPAWN_ANIMAL_START,      // New animal is created from existing animal
+    DO_NOTHING: DO_NOTHING_START,         // Does nothing (i.e. prevents other proteins from making the cell do anything)
+    KILL_SELF: KILL_SELF_START            // Kills the cell
 }
 
 var Protein = function() {
@@ -92,9 +96,15 @@ Protein.expressGene = function(geneExpressed) {
     } else if (geneExpressed < SPAWN_ANIMAL_START) {
         proteinChange[Proteins.DEVELOP_OPTICAL_CELL] = (geneExpressed - OPTICAL_CELL_START + 1) * Constant.DEVELOP_OPTICAL_CELL_MULTIPLIER;
         debug("Optical cell");
-    } else if (geneExpressed < NO_PROTEIN_START) {
+    } else if (geneExpressed < DO_NOTHING_START) {
         proteinChange[Proteins.SPAWN_ANIMAL] = (geneExpressed - SPAWN_ANIMAL_START + 1) * Constant.SPAWN_ANIMAL_MULTIPLIER;
         debug("Spawning new animal.");
+    } else if (geneExpressed < KILL_SELF_START) {
+        proteinChange[Proteins.DO_NOTHING] = (geneExpressed - DO_NOTHING_START + 1) * Constant.DO_NOTHING_MULITIPLIER;
+        debug("Adding do nothing protein.");
+    } else if (geneExpressed < NO_PROTEIN_START) {
+        proteinChange[Proteins.KILL_SELF] = (geneExpressed - KILL_SELF_START + 1) * Constant.KILL_SELF_MULTIPLIER;
+        debug("Killing self protein.");
     }
 
     return proteinChange;

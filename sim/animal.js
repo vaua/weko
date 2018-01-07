@@ -58,16 +58,14 @@ Animal.prototype.tick = function() {
     this.deadCells = [];
     this.age++;
 
-    this.proteins = null;
-
     this.cells.forEach(function(cell) {
         //debug("Ticking a cell with id: " + cell.id + ".");
-        if (cell === undefined) console.log("The cell is undefined.");
-        else debug("Running cell " + cell.id);
+        //if (cell === undefined) console.log("The cell is undefined.");
+        //else debug("Running cell " + cell.id);
         cell.tick();
     });
 
-    debug("Removing " + this.deadCells.length + " cells, adding " + this.newCells.length + " cells.");
+    debug("Animal " + this.id + " Removing " + this.deadCells.length + " cells, adding " + this.newCells.length + " cells.");
     this.newCells.forEach(function(cell) {
         that.cells.push(cell);
     });
@@ -84,7 +82,7 @@ Animal.prototype.tick = function() {
 
     // Check if this animal should die
     if (this.cells.length <= 0 || this.health <= 0) {
-        debug("This animal is dead! Put it into removal bin.");
+        debug("Animal " + this.id + " is dead! Put it into removal bin.");
 
         // Some house keeping, report some stats to the world.
         this.world.left += this.left;
@@ -165,7 +163,7 @@ Animal.prototype.tick = function() {
     // Adjust the cell connections - connect every willing cell with every willing dendrite
     this.cellsAcceptingDendrites.forEach(function(cell) {
         cell.addIncomingDendrites(that.cellsWithWillingDendrites);
-        debug("Added " + that.cellsWithWillingDendrites.length + " to cell with id " + cell.id);
+        debug("Animal " + this.id + " Added " + that.cellsWithWillingDendrites.length + " to cell with id " + cell.id);
     });
     // Now wipe these two lists as we have added all needed connections
     this.cellsAcceptingDendrites.clear();
@@ -178,7 +176,7 @@ Animal.prototype.tick = function() {
     var nodes = [];
     var edges = [];
     var visualInput = this.world.getVisualInput();
-    debug("Obtained visual input: " + visualInput);
+    debug("Animal " + this.id + " Obtained visual input: " + visualInput);
 
     var opticalCellNumber = 0;
     this.opticalCells.forEach(function(cell) {
@@ -192,13 +190,25 @@ Animal.prototype.tick = function() {
         // There are four options in the world - every forth optical cell react to specific thing.
         var rest = opticalCellNumber % 4;
         if (rest == 0)
-            if (visualInput[0] % 2 == 1) cell.setActive(199); // Food left in field - this cell should be active.
+            if (visualInput[0] % 2 == 1) {
+                debug("Animal " + this.id + " seeing food on left!");
+                cell.setActive(199); // Food left in field - this cell should be active.
+             }
         if (rest == 1)
-            if (visualInput[0] > 1) cell.setActive(199); // Danger left in field - thiss cell
+            if (visualInput[0] > 1) {
+                cell.setActive(199); // Danger left in field - thiss cell
+                debug("Animal " + this.id + " seeing danger on left!");
+            }
         if (rest == 2)
-            if (visualInput[1] % 2 == 1) cell.setActive(199); // Food right in field - this cell should be active.
+            if (visualInput[1] % 2 == 1) {
+                cell.setActive(199); // Food right in field - this cell should be active.
+                debug("Animal " + this.id + " seeing food on right!");
+            }
         if (rest == 3)
-            if (visualInput[1] > 1) cell.setActive(199); // Danger right in field - thiss cell
+            if (visualInput[1] > 1) {
+                cell.setActive(199); // Danger right in field - thiss cell
+                debug("Animal " + this.id + " seeing danger on right!");
+            }
         opticalCellNumber++;
     });
 
@@ -261,7 +271,7 @@ Animal.prototype.tick = function() {
 
             totalDendrites += 1;
             if (dendriteCell.isActive()) {
-                //debug("Found active input cell!");
+                debug("Found active input cell!");
                 sumOfInputs += 1;
             }
         });
@@ -271,7 +281,7 @@ Animal.prototype.tick = function() {
 
         // Now, check if the cell is active and contribute to the move.
         if (cell.isActive()) {
-            //console.log("Motor cell with number " + motorCellNumber + " is active!");
+            debug("Motor cell with number " + that.motorCellNumber + " is active!");
             if (that.motorCellNumber % 2 == 0) {
                 direction += 1;
             } else {
@@ -284,8 +294,8 @@ Animal.prototype.tick = function() {
 
     /* Move the animal */
     //console.log("Direction: " + direction);
-    if ((direction * direction) > 1) {
-        //debug("Motor cells active! We're moving towards: " + direction);
+    if ((direction * direction) >= 1) {
+        debug("Motor cells delta indicates activity (" + direction + ")! We're moving towards: " + direction);
         var oldPosition = this.position;
         this.position += direction;
         this.moves++;
@@ -316,7 +326,7 @@ Animal.prototype.tick = function() {
                 debug("Wrong move.");
             }
         } else {
-            //console.log("Attempted to move in a wrong direction. Was in position " + this.position + ", wanted to move " + direction + "!");
+            debug("Attempted to move in a wrong direction. Was in position " + this.position + ", wanted to move " + direction + "!");
         }
     }
 
