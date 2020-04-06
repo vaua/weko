@@ -74,12 +74,13 @@ Constant.SPAWN_ANIMAL_MULTIPLIER = 2;
 Constant.DO_NOTHING_MULITIPLIER = 1;
 Constant.KILL_SELF_MULTIPLIER = 1;
 
-Constant.USE_SPECIAL_DNA = true;
+Constant.USE_SPECIAL_DNA = false;
 Constant.specialDna = [40, 13, 19, 135, 105,
                        23, 23, 24, 26, 135,
                        95, 27, 27, 135, 125,
                        125, 125, 50, 125, 125,
                        85];
+// Random DNA that worked 100,115,4,110,18,13,103,33,106,46,3,18,48,145,105,44,28,34,12,129,15,102,37,45,9,85,3,52,84,78,117,26,82,37,86,5,41,51,87
 //Constant.specialDna = [80, 89, 66, 32, 51, 33, 67, 8, 34, 67, 66, 25, 111, 85, 86, 13, 90];
 /*Constant.specialDna = [57, 27, 68, 104, 76, 57, 44, 36, 100, 1, 60, 88, 30, 88,
    63, 25, 43, 11, 39, 78, 15, 41, 89, 9, 77, 57, 41, 32, 16, 76, 21, 94, 90,
